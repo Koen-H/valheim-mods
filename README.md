@@ -1,14 +1,14 @@
 # Valheim mods by koendertjh
 
-Client-side BepInEx mods for Valheim 1.0. Install them with r2modman or from
-[Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/).
+Client-side BepInEx mods for Valheim 1.0. Install them with r2modman (search for **koendertjh**) or download
+them from [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/).
 
-| Mod | What it does |
-| --- | --- |
-| [BuildTracker](BuildTracker/README.md) | "Not built" tab in the build menu with every piece you have never placed. |
-| [CraftTracker](CraftTracker/README.md) | "Not crafted" tab at crafting stations with every recipe you have never crafted. |
-| [TrophyAssister](TrophyAssister/README.md) | Trophy pity system, plus chances and missing trophies in the Trophies tab. |
-| [UnlockAwareness](UnlockAwareness/README.md) | "!" markers on newly unlocked recipes and build pieces. |
+| Mod | What it does | Download |
+| --- | --- | --- |
+| [BuildTracker](BuildTracker/README.md) | "Not built" tab in the build menu with every piece you have never placed. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) |
+| [CraftTracker](CraftTracker/README.md) | "Not crafted" tab at crafting stations with every recipe you have never crafted. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) |
+| [TrophyAssister](TrophyAssister/README.md) | Trophy pity system, plus chances and missing trophies in the Trophies tab. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/TrophyAssister/) |
+| [UnlockAwareness](UnlockAwareness/README.md) | "!" markers on newly unlocked recipes and build pieces. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/UnlockAwareness/) |
 
 ## Building
 
