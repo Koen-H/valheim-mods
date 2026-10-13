@@ -1,45 +1,42 @@
 # Valheim mods by koendertjh
 
-Client-side BepInEx mods for Valheim 1.0. Install them with r2modman (search for **koendertjh**) or download
-them from [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/).
+Small quality-of-life mods for **Valheim 1.0** that help you keep track of what you have built, crafted,
+unlocked and collected. Every mod is client-side: it only runs on your own game, works on vanilla servers,
+and other players don't need it.
 
-| Mod | What it does | Download |
-| --- | --- | --- |
-| [BuildTracker](BuildTracker/README.md) | "Not built" tab in the build menu with every piece you have never placed. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) |
-| [CraftTracker](CraftTracker/README.md) | "Not crafted" tab at crafting stations with every recipe you have never crafted. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) |
-| [TrophyAssister](TrophyAssister/README.md) | Trophy pity system, plus chances and missing trophies in the Trophies tab. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/TrophyAssister/) |
-| [UnlockAwareness](UnlockAwareness/README.md) | "!" markers on newly unlocked recipes and build pieces. | [Thunderstore](https://thunderstore.io/c/valheim/p/koendertjh/UnlockAwareness/) |
+## The mods
 
-## Building
+| | Mod | What it does | |
+| --- | --- | --- | --- |
+| <img src="BuildTracker/icon.png" width="64" alt=""> | **BuildTracker** | Adds a **Not built** tab to the build menu with every piece you have never placed, and shows how many pieces you haven't discovered yet. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) · [Details](BuildTracker/README.md) |
+| <img src="CraftTracker/icon.png" width="64" alt=""> | **CraftTracker** | Adds a **Not crafted** tab to crafting stations with every item you have never made. You can craft straight from it. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) · [Details](CraftTracker/README.md) |
+| <img src="TrophyAssister/icon.png" width="64" alt=""> | **TrophyAssister** | No more endless grinding for one trophy: every kill without a drop makes the next one more likely. The Trophies tab shows your chances and the trophies you are still missing. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/TrophyAssister/) · [Details](TrophyAssister/README.md) |
+| <img src="UnlockAwareness/icon.png" width="64" alt=""> | **UnlockAwareness** | Puts a **!** on every new recipe and build piece until you have looked at it, so new unlocks never go unnoticed. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/UnlockAwareness/) · [Details](UnlockAwareness/README.md) |
 
-Needs the .NET SDK (6 or newer), Valheim, and BepInExPack_Valheim in an r2modman profile. The mods compile
-against the game's own DLLs, which are never copied into this repo.
+The mods work fine on their own, and also together.
 
-```
-dotnet build BuildTracker -c Release
-```
+## How to install
 
-This also copies the DLL into the r2modman **Default** profile. Close Valheim first (it locks the DLL), or add
-`-p:Deploy=false` to only build. Other locations: `-p:R2Profile=MyProfile`, `-p:ValheimDir="X:\path\to\Valheim"`.
+**With a mod manager (easiest):** in [r2modman](https://thunderstore.io/c/valheim/p/ebkr/r2modman/) or the
+Thunderstore app, pick Valheim, search for **koendertjh** and click install. BepInEx is installed for you.
 
-Shared build settings are in `Directory.Build.props` / `.targets`. Each mod's version lives only in its
-`manifest.json`; the plugin's `[BepInPlugin]` version is generated from it.
+**By hand:**
+1. Install [BepInExPack for Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
+   (follow the steps on its page).
+2. Download a mod with the **Download** link above (the *Manual Download* button on Thunderstore) and unzip it.
+3. Copy the `.dll` file into `Valheim\BepInEx\plugins\`.
 
-## Releasing
+Settings appear in `BepInEx\config\` after starting the game once with the mod. Each mod's
+**Details** page explains its settings.
 
-1. Bump `version_number` in `<Mod>/manifest.json` and add a `## <version>` section to `<Mod>/CHANGELOG.md`.
-2. Dry run (builds, packs and checks; publishes nothing): `.\release.ps1 <Mod>`
-3. Commit and push to `main`, then: `.\release.ps1 <Mod> -Publish`
-   This creates the GitHub Release `<Mod>-v<version>` with the zip attached.
-4. The **Publish to Thunderstore** action checks the zip again and waits for approval under
-   *Actions*. Approve it to upload.
+## Questions and bugs
 
-One-time setup: GitHub CLI (`winget install GitHub.cli`, `gh auth login`); a GitHub environment
-`thunderstore` with yourself as required reviewer and the secret `THUNDERSTORE_TOKEN` (a Thunderstore
-service-account token of the `koendertjh` team).
+Found a bug or have an idea? Open an [issue](https://github.com/Koen-H/valheim-mods/issues). Please mention
+which mod and version you use, and attach `BepInEx\LogOutput.log` if something went wrong.
 
-Icons: edit `tools/icons/make_icons.py`, then run `tools\render_icons.ps1` (uses Chrome or Edge).
+## About
 
-## License
+These mods are made with the help of AI (Claude).
+Building them yourself or want to help out? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-[MIT](LICENSE)
+Licensed under [MIT](LICENSE): you are free to learn from, change and reuse the code.
