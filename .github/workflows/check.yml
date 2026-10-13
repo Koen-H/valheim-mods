@@ -1,0 +1,35 @@
+# Checks every push and pull request. The mods themselves can't be built here (they need Valheim's DLLs),
+# so this checks what can be: each mod's Thunderstore files, the tools, and that no DLLs got committed.
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No DLLs in the repository
+        run: |
+          if git ls-files | grep -iE '\.(dll|exe|pdb)$'; then
+            echo "::error::Binaries must not be committed (game and BepInEx DLLs are copyrighted)."
+            exit 1
+          fi
+
+      - name: Check each mod's manifest, icon, README and changelog
+        run: |
+          status=0
+          for manifest in */manifest.json; do
+            python3 tools/validate_package.py --source "$(dirname "$manifest")" || status=1
+          done
+          exit $status
+
+      - name: Check the tools compile
+        run: python3 -m py_compile tools/*.py tools/icons/*.py

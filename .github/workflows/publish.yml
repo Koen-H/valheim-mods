@@ -1,0 +1,106 @@
+# Publishes a mod to Thunderstore when release.ps1 -Publish creates a GitHub Release "<Mod>-v<version>".
+#
+# The mods are built on the developer's PC (they compile against Valheim's own DLLs, which can't be on
+# GitHub), so this workflow never builds: it checks the attached zip and uploads it.
+# The upload job runs in the "thunderstore" environment, which requires a manual approval on GitHub and
+# holds the THUNDERSTORE_TOKEN secret.
+#
+# Run it by hand (Actions > Publish to Thunderstore > Run workflow) to re-check a release's package,
+# or to retry an upload with "publish" ticked.
+name: Publish to Thunderstore
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag, e.g. BuildTracker-v1.0.0
+        required: true
+      publish:
+        description: Upload to Thunderstore (unticked = only check the package)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.event.release.tag_name || inputs.tag }}
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  check:
+    name: Check package
+    runs-on: ubuntu-latest
+    outputs:
+      zip: ${{ steps.download.outputs.zip }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Download the package from the release
+        id: download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dist
+          gh release download "$TAG" --dir dist --pattern 'koendertjh-*.zip'
+          count=$(find dist -name '*.zip' | wc -l)
+          if [ "$count" -ne 1 ]; then
+            echo "::error::Release $TAG should have exactly one koendertjh-*.zip, found $count"
+            exit 1
+          fi
+          echo "zip=$(find dist -name '*.zip')" >> "$GITHUB_OUTPUT"
+
+      - name: Check package rules
+        run: python3 tools/validate_package.py "${{ steps.download.outputs.zip }}" --tag "$TAG"
+
+      - name: Check the package matches the tagged source
+        run: |
+          mod="${TAG%-v*}"
+          unzip -p "${{ steps.download.outputs.zip }}" manifest.json | diff -u "$mod/manifest.json" - \
+            || { echo "::error::manifest.json in the zip differs from $mod/manifest.json at $TAG"; exit 1; }
+          for file in README.md CHANGELOG.md icon.png; do
+            unzip -p "${{ steps.download.outputs.zip }}" "$file" | cmp -s "$mod/$file" - \
+              || { echo "::error::$file in the zip differs from $mod/$file at $TAG"; exit 1; }
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: dist/
+
+  publish:
+    name: Upload to Thunderstore
+    needs: check
+    if: github.event_name == 'release' || inputs.publish
+    runs-on: ubuntu-latest
+    environment: thunderstore
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: package
+          path: dist/
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install Thunderstore CLI
+        run: dotnet tool install --global tcli --version 0.2.4
+
+      - name: Publish
+        env:
+          TCLI_AUTH_TOKEN: ${{ secrets.THUNDERSTORE_TOKEN }}
+          ZIP: ${{ needs.check.outputs.zip }}
+        run: |
+          python3 tools/tcli_config.py "$ZIP" > thunderstore.toml
+          tcli publish --config-path thunderstore.toml --file "$ZIP"

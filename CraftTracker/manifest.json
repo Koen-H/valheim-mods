@@ -1,0 +1,9 @@
+{
+  "name": "CraftTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Adds a \"Not crafted\" tab to crafting stations listing every recipe you have never crafted, plus how many recipes you have not discovered yet. Client-side, uses your character's own stats.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

@@ -1,0 +1,9 @@
+* text=auto
+# Files that go into the Thunderstore zip must be byte-identical on Windows and on GitHub's Linux runners.
+*.md   text eol=lf
+*.json text eol=lf
+*.svg  text eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.ps1  text eol=crlf
+*.png  binary

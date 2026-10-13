@@ -1,0 +1,38 @@
+<Project>
+
+  <!-- Settings shared by every mod in this repo. Each mod's csproj only lists what is specific to it. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Unity's assemblies reference slightly mismatched versions of each other; harmless. -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+
+    <!-- Valheim install folder (game assemblies). Override with: dotnet build -p:ValheimDir="X:\path\to\Valheim" -->
+    <ValheimDir Condition="'$(ValheimDir)' == ''">D:\SteamLibrary\steamapps\common\Valheim</ValheimDir>
+    <ManagedDir>$(ValheimDir)\valheim_Data\Managed</ManagedDir>
+    <!-- r2modman profile (BepInEx + plugins). Override with: dotnet build -p:R2Profile=MyProfile -->
+    <R2Profile Condition="'$(R2Profile)' == ''">Default</R2Profile>
+    <BepInExDir>$(APPDATA)\r2modmanPlus-local\Valheim\profiles\$(R2Profile)\BepInEx</BepInExDir>
+
+    <!-- The Thunderstore manifest is the single source of the mod's version (see PluginInfo in Directory.Build.targets). -->
+    <ThunderstoreManifest>$(MSBuildProjectDirectory)\manifest.json</ThunderstoreManifest>
+    <Version Condition="Exists('$(ThunderstoreManifest)')">$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('$(ThunderstoreManifest)')), '(?s)^.*"version_number"\s*:\s*"([^"]*)".*$', '$1'))</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Every mod needs these; game and BepInEx DLLs are referenced in place and never copied or committed. -->
+  <ItemGroup>
+    <Reference Include="$(BepInExDir)\core\BepInEx.dll" Private="false" />
+    <Reference Include="$(BepInExDir)\core\0Harmony.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\assembly_valheim.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.CoreModule.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

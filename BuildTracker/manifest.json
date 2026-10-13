@@ -1,0 +1,9 @@
+{
+  "name": "BuildTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Adds a \"Not built\" tab to the build menu listing every piece you have never placed, plus how many pieces you have not discovered yet. Client-side, uses your character's own stats.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

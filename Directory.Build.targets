@@ -1,0 +1,27 @@
+<Project>
+
+  <!-- Generates PluginInfo.Version from manifest.json, so [BepInPlugin] always matches the released package. -->
+  <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
+    <Error Condition="'$(Version)' == '' Or !Exists('$(ThunderstoreManifest)')" Text="No version_number found in $(ThunderstoreManifest)." />
+    <PropertyGroup>
+      <_PluginInfoFile>$(IntermediateOutputPath)PluginInfo.g.cs</_PluginInfoFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_PluginInfoFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="namespace $(RootNamespace) { internal static class PluginInfo { public const string Version = &quot;$(Version)&quot;%3B } }" />
+    <ItemGroup>
+      <Compile Include="$(_PluginInfoFile)" />
+      <FileWrites Include="$(_PluginInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Copy the built plugin straight into the r2modman profile's plugins folder.
+       Skip it (e.g. while the game is running) with: dotnet build -p:Deploy=false -->
+  <Target Name="DeployToValheim" AfterTargets="Build" Condition="'$(Deploy)' != 'false' And Exists('$(BepInExDir)\plugins')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)\plugins\$(AssemblyName)" Retries="0" ContinueOnError="true">
+      <Output TaskParameter="CopiedFiles" ItemName="_DeployedFiles" />
+    </Copy>
+    <Message Importance="high" Condition="'@(_DeployedFiles)' != ''" Text="Deployed $(TargetFileName) to $(BepInExDir)\plugins\$(AssemblyName)" />
+    <Warning Condition="'@(_DeployedFiles)' == ''" Text="Could not deploy $(TargetFileName): close Valheim and build again." />
+  </Target>
+
+</Project>

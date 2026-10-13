@@ -1,0 +1,20 @@
+# Build output
+bin/
+obj/
+dist/
+build/
+*.user
+.vs/
+.vscode/
+.idea/
+
+# Never commit game, Unity or BepInEx files
+*.dll
+*.pdb
+*.exe
+
+# Local Claude Code notes
+.claude/
+
+__pycache__/
+thunderstore.toml
