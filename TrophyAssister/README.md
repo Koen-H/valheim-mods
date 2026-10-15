@@ -35,9 +35,9 @@ character keeps its counters and two characters with the same name don't share t
 trophies (vanilla chance ≤ 5%). A 10% trophy goes 10% → 11% → 12.1% → 13.3% ...
 **Flat** mode: every dry kill adds `FlatBonusPerKill` (0.05 = +5 percentage points).
 `GuaranteeAfterKills` adds a hard cap (e.g. 20 = trophy guaranteed by kill 21).
-**Starred creatures** (`StarKillBonus`, on by default) count as extra dry kills:
-1 + stars × `ExtraKillsPerStar`. With the default of 1, a 1-star kill counts as 2 dry kills and a
-2-star kill as 3. (The game itself already doubles the base drop chance per star.)
+**Starred creatures**: the game doubles the trophy chance per star (1 star = 2×, 2 stars = 4×), on
+top of the pity chance. `StarChanceMultiplier` (default 2 = vanilla) sets that per-star multiplier;
+3 makes a 1-star 3× and a 2-star 9×. It can't go below vanilla.
 
 The game's own roll is never changed. For chances of 30% or less the game uses its own
 anti-bad-luck counter, and that keeps working. When the game's roll misses, the mod rolls the
@@ -69,6 +69,7 @@ Type these in chat with a leading `/` (or in the F5 console without it). They're
 | General | LogKills | false | Logs every trophy-creature kill (for troubleshooting) |
 | Base boost | ChanceMultiplier | 1 | Extra multiplier on the base chance (1 = vanilla) |
 | Base boost | OnlyUncollected | false | Only trophies you've never picked up |
+| Base boost | StarChanceMultiplier | 2 | Chance multiplier per star (2 = vanilla, 2–10) |
 | Pity | Enabled | true | Turn the per-kill increase on/off |
 | Pity | Mode | Compound | Compound or Flat |
 | Pity | GrowthPerKill | 0.10 | Compound: growth per dry kill |
@@ -77,8 +78,6 @@ Type these in chat with a leading `/` (or in the F5 console without it). They're
 | Pity | FlatBonusPerKill | 0.05 | Flat: added per dry kill |
 | Pity | GuaranteeAfterKills | 0 | Hard pity (0 = off) |
 | Pity | OnlyCountMyKills | true | Only your kills (see above) add pity |
-| Pity | StarKillBonus | true | Starred kills add extra dry kills |
-| Pity | ExtraKillsPerStar | 1 | Extra dry kills per star (0–10) |
 | Trophy list | ShowChances | true | Chance + dry kills on each trophy |
 | Trophy list | ShowMissing | true | Add uncollected trophies |
 | Trophy list | SpoilerFree | true | Hide never-killed trophies behind "?" |

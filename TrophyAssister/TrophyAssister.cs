@@ -39,6 +39,7 @@ namespace TrophyAssister
         // Base boost
         internal static ConfigEntry<float> ChanceMultiplier;
         internal static ConfigEntry<bool> OnlyUncollected;
+        internal static ConfigEntry<float> StarChanceMultiplier;
 
         // Pity
         internal static ConfigEntry<bool> PityEnabled;
@@ -49,8 +50,6 @@ namespace TrophyAssister
         internal static ConfigEntry<float> RareGrowthPerKill;
         internal static ConfigEntry<int> GuaranteeAfterKills;
         internal static ConfigEntry<bool> OnlyCountMyKills;
-        internal static ConfigEntry<bool> StarKillBonus;
-        internal static ConfigEntry<int> ExtraKillsPerStar;
 
         // Trophy list
         internal static ConfigEntry<bool> ShowChancesInList;
@@ -78,6 +77,11 @@ namespace TrophyAssister
                     new AcceptableValueRange<float>(1f, 100f)));
             OnlyUncollected = Config.Bind("2 - Base boost", "OnlyUncollected", false,
                 "Only boost (and count pity for) trophies this character has never picked up.");
+            StarChanceMultiplier = Config.Bind("2 - Base boost", "StarChanceMultiplier", 2f,
+                new ConfigDescription("Each star multiplies the trophy chance by this. 2 = vanilla " +
+                    "(1 star = 2x, 2 stars = 4x). Higher makes starred creatures drop trophies more often; " +
+                    "the chance can't go below vanilla.",
+                    new AcceptableValueRange<float>(2f, 10f)));
 
             PityEnabled = Config.Bind("3 - Pity", "Enabled", true,
                 "Increase the trophy chance with every kill that didn't drop one.");
@@ -103,11 +107,6 @@ namespace TrophyAssister
             OnlyCountMyKills = Config.Bind("3 - Pity", "OnlyCountMyKills", true,
                 "Only your kills add pity: your last hit, a burn/poison tick after your hit, or a kill by your " +
                 "summons and tamed creatures following you. Turn off to count kills by anyone your game processes.");
-            StarKillBonus = Config.Bind("3 - Pity", "StarKillBonus", true,
-                "Starred creatures add extra pity when they don't drop their trophy (see ExtraKillsPerStar).");
-            ExtraKillsPerStar = Config.Bind("3 - Pity", "ExtraKillsPerStar", 1,
-                new ConfigDescription("Extra dry kills counted per star. 1 = a 1-star kill counts as 2 dry kills, a 2-star as 3.",
-                    new AcceptableValueRange<int>(0, 10)));
 
             ShowChancesInList = Config.Bind("4 - Trophy list", "ShowChances", true,
                 "Show the current drop chance and dry-kill count on each trophy in the Trophies tab.");
@@ -155,7 +154,7 @@ namespace TrophyAssister
         {
             public CharacterDrop.Drop Drop;
             public float BaseChance; // drop.m_chance, 0-star
-            public float Vanilla;    // what the game rolls (with its star multiplier)
+            public float Vanilla;    // what the game rolls (with its 2x-per-star multiplier)
             public float Target;     // boosted chance we want in total
         }
 
@@ -164,7 +163,6 @@ namespace TrophyAssister
             public string CharKey;
             public string CreatureKey;
             public string CreatureName;
-            public int Stars;
             public int LevelMultiplier;
             public readonly List<Entry> Trophies = new List<Entry>();
         }
@@ -198,6 +196,7 @@ namespace TrophyAssister
                         $"Kill: {creatureKey} ({level - 1} star), last hit by {KillCredit.LastAttackerName(character)}, " +
                         $"counts for pity: {countPity}");
                 int levelMult = Mathf.Max(1, (int)Mathf.Pow(2f, level - 1)); // same as the game
+                float starMult = Mathf.Max(levelMult, Mathf.Pow(TrophyAssisterPlugin.StarChanceMultiplier.Value, level - 1));
                 HashSet<string> owned = null;
 
                 foreach (var drop in __instance.m_drops)
@@ -209,10 +208,9 @@ namespace TrophyAssister
                         if (owned.Contains(drop.m_prefab.name)) continue;
                     }
 
-                    float mult = drop.m_levelMultiplier ? levelMult : 1;
                     int dry = countPity ? PityStore.Get(charKey, creatureKey) : 0;
-                    float vanilla = Mathf.Clamp01(drop.m_chance * mult);
-                    float target = Mathf.Clamp01(Chance.Next(drop.m_chance, dry) * mult);
+                    float vanilla = Mathf.Clamp01(drop.m_chance * (drop.m_levelMultiplier ? levelMult : 1));
+                    float target = Mathf.Clamp01(Chance.Next(drop.m_chance, dry) * (drop.m_levelMultiplier ? starMult : 1));
                     if (target <= vanilla && !countPity) continue;
 
                     if (__state == null)
@@ -221,7 +219,6 @@ namespace TrophyAssister
                             CharKey = charKey,
                             CreatureKey = countPity ? creatureKey : null,
                             CreatureName = character != null ? GameUtil.Localize(character.m_name) : creatureKey,
-                            Stars = Mathf.Max(0, level - 1),
                             LevelMultiplier = levelMult
                         };
 
@@ -275,20 +272,12 @@ namespace TrophyAssister
                 }
                 else if (__state.CreatureKey != null)
                 {
-                    // A starred creature counts as extra dry kills: 1 + stars * ExtraKillsPerStar.
-                    int weight = 1;
-                    if (TrophyAssisterPlugin.StarKillBonus.Value && __state.Stars > 0)
-                        weight += __state.Stars * TrophyAssisterPlugin.ExtraKillsPerStar.Value;
-
-                    int dry = PityStore.Increment(__state.CharKey, __state.CreatureKey, weight);
+                    int dry = PityStore.Increment(__state.CharKey, __state.CreatureKey);
                     float next = Chance.Next(__state.Trophies[0].BaseChance, dry);
                     if (TrophyAssisterPlugin.LogKills.Value)
-                        TrophyAssisterPlugin.Log.LogInfo($"  -> no trophy, +{weight} dry kill(s) = {dry}, next chance {next:P0}");
+                        TrophyAssisterPlugin.Log.LogInfo($"  -> no trophy, dry kills = {dry}, next chance {next:P0} (0 star)");
                     if (TrophyAssisterPlugin.ShowPityProgress.Value)
-                    {
-                        string bonus = weight > 1 ? $" (+{weight}, {__state.Stars} star{(__state.Stars == 1 ? "" : "s")})" : "";
-                        PityLabel.Show($"{__state.CreatureName} trophy: {dry} dry kill{(dry == 1 ? "" : "s")}{bonus}, next chance {next:P0}");
-                    }
+                        PityLabel.Show($"{__state.CreatureName} trophy: {dry} dry kill{(dry == 1 ? "" : "s")}, next chance {next:P0}");
                 }
             }
             catch (Exception e)
@@ -303,7 +292,7 @@ namespace TrophyAssister
             int n = drop.m_dontScale
                 ? UnityEngine.Random.Range(drop.m_amountMin, drop.m_amountMax)
                 : Game.instance.ScaleDrops(drop.m_prefab, drop.m_amountMin, drop.m_amountMax);
-            if (drop.m_levelMultiplier) n *= levelMult;
+            if (drop.m_levelMultiplier && !drop.m_levelMultiplierNotAmount) n *= levelMult;
             if (drop.m_onePerPlayer && ZNet.instance != null) n = ZNet.instance.GetNrOfPlayers();
             return Mathf.Clamp(n, 1, 100);
         }
