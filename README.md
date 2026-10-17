@@ -1,8 +1,8 @@
 # Valheim mods by koendertjh
 
 Small quality-of-life mods for **Valheim 1.0** that help you keep track of what you have built, crafted,
-unlocked and collected. Every mod is client-side: it only runs on your own game, works on vanilla servers,
-and other players don't need it.
+unlocked and collected. Every mod runs on your own game and works on vanilla servers. Other players don't
+need them, except EssenceForAll, which works best when the whole group has it.
 
 ## The mods
 
@@ -10,6 +10,7 @@ and other players don't need it.
 | --- | --- | --- | --- |
 | <img src="BuildTracker/icon.png" width="64" alt=""> | **BuildTracker** | Adds a **Not built** tab to the build menu with every piece you have never placed, and shows how many pieces you haven't discovered yet. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) · [Details](BuildTracker/README.md) |
 | <img src="CraftTracker/icon.png" width="64" alt=""> | **CraftTracker** | Adds a **Not crafted** tab to crafting stations with every item you have never made. You can craft straight from it. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) · [Details](CraftTracker/README.md) |
+| <img src="EssenceForAll/icon.png" width="64" alt=""> | **EssenceForAll** | Thunderblood and Frostfire essences always drop, with one share for every player that was nearby when the creature spawned. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/EssenceForAll/) · [Details](EssenceForAll/README.md) |
 | <img src="TrophyAssister/icon.png" width="64" alt=""> | **TrophyAssister** | No more endless grinding for one trophy: every kill without a drop makes the next one more likely. The Trophies tab shows your chances and the trophies you are still missing. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/TrophyAssister/) · [Details](TrophyAssister/README.md) |
 | <img src="UnlockAwareness/icon.png" width="64" alt=""> | **UnlockAwareness** | Puts a **!** on every new recipe, build piece and first-time item until you have looked at it, so new unlocks never go unnoticed. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/UnlockAwareness/) · [Details](UnlockAwareness/README.md) |
 
