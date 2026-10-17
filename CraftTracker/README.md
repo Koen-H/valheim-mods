@@ -15,6 +15,9 @@ Crafting from the tab works exactly like the Craft tab.
 
 - Crafted everything? The tab says **"Congrats! You have crafted every item of it!"** (or, while some recipes are
   still undiscovered, that everything discovered so far is crafted and there are more items left to discover).
+
+  ![Not crafted tab with the congrats message for crafting everything discovered so far, and 1 not discovered yet](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/CraftTracker/screenshots/congrats.png)
+
 - Client-side only; works on vanilla servers. Companion to BuildTracker.
 
 ## Limitations
