@@ -6,7 +6,8 @@ namespace UnlockAwareness
     public enum UnlockKind
     {
         Recipe,
-        Piece
+        Piece,
+        Item
     }
 
     /// <summary>
@@ -25,7 +26,10 @@ namespace UnlockAwareness
         public static event Action Changed;
 
         public static string MakeKey(UnlockKind kind, string name) =>
-            (kind == UnlockKind.Recipe ? "r:" : "p:") + name;
+            (kind == UnlockKind.Recipe ? "r:" : kind == UnlockKind.Piece ? "p:" : "i:") + name;
+
+        /// <summary>True if anything at all is unseen; a cheap check before building keys every frame.</summary>
+        public static bool HasAnyUnseen => Sync() && s_unseen.Count > 0;
 
         public static bool IsUnseen(UnlockKind kind, string name) =>
             Sync() && s_unseen.Contains(MakeKey(kind, name));
