@@ -53,24 +53,58 @@ namespace UnlockAwareness
         }
     }
 
-    /// <summary>Badges on new items in the player's inventory grid. Clicking an item clears its badge.</summary>
+    /// <summary>
+    /// Badges on items in the inventory and in an open chest: "!" on new items until clicked, and "?" on chest
+    /// items this character has never had. With LearnFromContainers, opening a chest learns its items instead.
+    /// </summary>
     [HarmonyPatch]
     internal static class InventoryPatches
     {
         private static readonly AccessTools.FieldRef<InventoryGrid, List<InventoryElement>> ElementsRef =
             AccessTools.FieldRefAccess<InventoryGrid, List<InventoryElement>>("m_elements");
+        private static readonly AccessTools.FieldRef<InventoryGui, InventoryGrid> ContainerGridRef =
+            AccessTools.FieldRefAccess<InventoryGui, InventoryGrid>("m_containerGrid");
+        private static readonly System.Action<Player> UpdateKnownRecipesList =
+            AccessTools.MethodDelegate<System.Action<Player>>(AccessTools.Method(typeof(Player), "UpdateKnownRecipesList"));
 
         // Runs every frame while the inventory is open, so it only builds keys when something is unseen.
         [HarmonyPatch(typeof(InventoryGrid), "UpdateGui")]
         [HarmonyPostfix]
         private static void UpdateGui_Postfix(InventoryGrid __instance)
         {
-            if (InventoryGui.instance == null || __instance != InventoryGui.instance.m_playerGrid) return;
-            List<InventoryElement> elements = ElementsRef(__instance);
-            Inventory inventory = __instance.GetInventory();
-            bool show = UnlockAwarenessPlugin.InventoryBadges.Value && UnseenStore.HasAnyUnseen;
+            InventoryGui gui = InventoryGui.instance;
+            if (gui == null) return;
+            bool container = __instance == ContainerGridRef(gui);
+            if (!container && __instance != gui.m_playerGrid) return;
 
-            foreach (InventoryElement element in elements)
+            if (container && UnlockAwarenessPlugin.LearnFromContainers.Value) LearnItems(__instance.GetInventory());
+            UpdateNewBadges(__instance);
+            if (container) UpdateUnknownBadges(__instance);
+        }
+
+        // Opening a chest counts as having its items: the game learns them exactly like a pickup, so the
+        // "new item" message, the "!" (via AddKnownItem) and any recipes or pieces they unlock all follow.
+        private static void LearnItems(Inventory inventory)
+        {
+            Player player = Player.m_localPlayer;
+            if (player == null || inventory == null) return;
+            bool learned = false;
+            foreach (ItemDrop.ItemData item in inventory.GetAllItems())
+            {
+                if (player.IsKnownMaterial(item.m_shared.m_name)) continue;
+                player.AddKnownItem(item);
+                learned = true;
+            }
+            // Picked-up items trigger this through the inventory; chest items don't, so do it here.
+            if (learned) UpdateKnownRecipesList(player);
+        }
+
+        private static void UpdateNewBadges(InventoryGrid grid)
+        {
+            Inventory inventory = grid.GetInventory();
+            bool show = UnlockAwarenessPlugin.InventoryBadges.Value && UnseenStore.HasAnyUnseen && inventory != null;
+
+            foreach (InventoryElement element in ElementsRef(grid))
             {
                 // Top center: the corners hold the hotbar number, quality and other game markers.
                 UnseenBadge badge = UiFactory.GetOrCreateBadge(element.transform, 18f, new Vector2(0.5f, 1f), new Vector2(0f, -10f));
@@ -84,6 +118,23 @@ namespace UnlockAwareness
                 {
                     badge.Hide();
                 }
+            }
+        }
+
+        // A "?" on chest items this character has never had. Taking one makes the game learn it
+        // (AddKnownItem), which swaps the "?" for the "!" in the player's inventory.
+        private static void UpdateUnknownBadges(InventoryGrid grid)
+        {
+            Player player = Player.m_localPlayer;
+            Inventory inventory = grid.GetInventory();
+            bool show = UnlockAwarenessPlugin.ContainerBadges.Value && player != null && inventory != null;
+
+            foreach (InventoryElement element in ElementsRef(grid))
+            {
+                GameObject badge = UiFactory.GetOrCreateUnknownBadge(element.transform, element.m_amount, 22f, new Vector2(0.5f, 1f), new Vector2(0f, -11f));
+                ItemDrop.ItemData item = show && element.m_used ? inventory.GetItemAt(element.Position.x, element.Position.y) : null;
+                bool unknown = item != null && !player.IsKnownMaterial(item.m_shared.m_name);
+                if (badge.activeSelf != unknown) badge.SetActive(unknown);
             }
         }
 
@@ -101,7 +152,7 @@ namespace UnlockAwareness
         // The badges themselves follow on the next UpdateGui, which also clears other stacks of the same item.
         private static void MarkSeen(InventoryGui gui, InventoryGrid grid, ItemDrop.ItemData item)
         {
-            if (item != null && grid == gui.m_playerGrid)
+            if (item != null && (grid == gui.m_playerGrid || grid == ContainerGridRef(gui)))
                 UnseenStore.MarkSeen(UnseenStore.MakeKey(UnlockKind.Item, item.m_shared.m_name));
         }
     }

@@ -1,6 +1,6 @@
 {
   "name": "UnlockAwareness",
-  "version_number": "1.1.0",
+  "version_number": "1.2.0",
   "website_url": "https://github.com/Koen-H/valheim-mods",
   "description": "Marks newly unlocked recipes, build pieces and first-time items with a \"!\" until you look at them, with a \"Mark all as seen\" button in the crafting panel and build menu. Client-side.",
   "dependencies": [

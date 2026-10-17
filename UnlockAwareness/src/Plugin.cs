@@ -2,7 +2,7 @@
 //
 // Every recipe or piece the character learns gets a "!" badge in the crafting panel or build menu
 // until it is selected, or cleared with the "Mark all as seen" button. Items picked up for the first
-// time get the same badge in the inventory until clicked. The unseen list is stored in the
+// time get the same badge in the inventory until clicked; opening a chest learns its items (or marks them "?"). The unseen list is stored in the
 // character's own save (Player.m_customData). Client-side only.
 
 using BepInEx;
@@ -24,6 +24,8 @@ namespace UnlockAwareness
 
         internal static ConfigEntry<bool> FlagAllKnownOnce;
         internal static ConfigEntry<bool> InventoryBadges;
+        internal static ConfigEntry<bool> ContainerBadges;
+        internal static ConfigEntry<bool> LearnFromContainers;
         internal static ConfigEntry<Color> BadgeColor;
 
         private Harmony _harmony;
@@ -38,6 +40,13 @@ namespace UnlockAwareness
             InventoryBadges = Config.Bind("General", "InventoryBadges", true,
                 "If true, items you pick up for the first time get a '!' marker in your inventory until you click them. " +
                 "If false, no inventory markers are shown and new items are not recorded.");
+            ContainerBadges = Config.Bind("General", "ContainerBadges", true,
+                "If true, items in a chest (or other container) that you have never had in your inventory get a '?' marker. " +
+                "The marker disappears once you take the item. Only used when LearnFromContainers is false.");
+            LearnFromContainers = Config.Bind("General", "LearnFromContainers", true,
+                "If true, opening a chest (or other container) counts as having the items inside: your character learns them " +
+                "as if picked up, which also unlocks any recipes and pieces they lead to, and they get a '!' right away. " +
+                "If false, unknown items show a '?' (see ContainerBadges) until you take them.");
             BadgeColor = Config.Bind("Badge", "Color", new Color(1f, 0.62f, 0.1f, 1f),
                 "Color of the '!' marker shown on newly unlocked recipes, pieces and items.");
 

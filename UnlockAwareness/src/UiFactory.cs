@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -65,6 +66,7 @@ namespace UnlockAwareness
     internal static class UiFactory
     {
         private const string BadgeName = "UnlockAwareness_Badge";
+        private const string UnknownBadgeName = "UnlockAwareness_Unknown";
 
         // Sprites from Valheim's own UI atlas.
         private const string BadgeSpriteName = "exclamation_mark";
@@ -118,6 +120,45 @@ namespace UnlockAwareness
             var badge = go.GetComponent<UnseenBadge>();
             badge.Hide();
             return badge;
+        }
+
+        /// <summary>
+        /// Returns the "?" marker under <paramref name="parent"/>, creating it if needed. Uses the font of
+        /// <paramref name="styleSource"/> (the slot's amount text) so it matches the game's own lettering.
+        /// </summary>
+        public static GameObject GetOrCreateUnknownBadge(Transform parent, TMP_Text styleSource, float fontSize, Vector2 anchor, Vector2 offset)
+        {
+            Transform existing = parent.Find(UnknownBadgeName);
+            if (existing != null) return existing.gameObject;
+
+            var go = new GameObject(UnknownBadgeName, typeof(RectTransform), typeof(TextMeshProUGUI));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            rt.anchorMin = rt.anchorMax = anchor;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = offset;
+            rt.sizeDelta = new Vector2(fontSize, fontSize);
+            rt.SetAsLastSibling();
+
+            var text = go.GetComponent<TextMeshProUGUI>();
+            if (styleSource != null)
+            {
+                text.font = styleSource.font;
+                text.fontSharedMaterial = styleSource.fontSharedMaterial;
+            }
+            text.text = "?";
+            text.fontSize = fontSize;
+            text.fontStyle = FontStyles.Bold;
+            text.color = UnlockAwarenessPlugin.BadgeColor.Value;
+            text.alignment = TextAlignmentOptions.Center;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.raycastTarget = false;
+            // Dark edge like the "!" outline, so it stays readable on bright icons.
+            text.outlineColor = new Color(0f, 0f, 0f, 0.9f);
+            text.outlineWidth = 0.25f;
+
+            go.SetActive(false);
+            return go;
         }
 
         /// <summary>
