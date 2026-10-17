@@ -13,6 +13,9 @@ time gets an orange **!** marker until you have looked at it.
   marker disappears.
 - **Inventory**: items you pick up for the very first time show a **!** in your inventory. Click the item (or
   right-click to use or equip it) and the marker disappears. Turn it off with `InventoryBadges`.
+- **Chests**: opening a chest counts as having the items inside: your character learns them (unlocking any recipes
+  and pieces they lead to) and they get a **!** right away. Turn it off with `LearnFromContainers`; unknown chest
+  items then show a **?** until you take them (turn that off with `ContainerBadges`).
 
   ![Stone and wood in the inventory, each with an orange ! marker](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/UnlockAwareness/screenshots/inventory-badges.png)
 
@@ -35,6 +38,8 @@ is marked as new (once per character). Clear them with **Mark all as seen**.
 | --- | --- | --- | --- |
 | General | `FlagAllKnownOnce` | `false` | Mark every recipe and piece a character already knows as new, once per character. |
 | General | `InventoryBadges` | `true` | Show a **!** on items you pick up for the first time, until you click them. |
+| General | `LearnFromContainers` | `true` | Opening a chest learns the items inside, as if picked up. |
+| General | `ContainerBadges` | `true` | With `LearnFromContainers` off: show a **?** on chest items you have never had. |
 | Badge | `Color` | orange | Color of the **!** marker. |
 
 ## Notes
