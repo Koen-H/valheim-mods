@@ -3,11 +3,16 @@
 Adds a **Not built** tab to the build menu (after Favorites) that lists every piece of the tool in your hand
 (hammer, hoe, cultivator, ...) that this character has never placed. Place a piece once and it drops off the list.
 
+![Not built tab in the build menu listing pieces this character has never placed](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/BuildTracker/screenshots/not-built-tab.png)
+
 - Uses the character's own save data: the per-piece "placed" counts the game keeps for the building achievements.
   Nothing extra is saved and nothing is written.
 - The category list on the left only shows categories that still have unbuilt pieces.
 - A bar under the pieces shows **"N not discovered yet"**: pieces of the tool (or of the selected category)
   you haven't unlocked, so you know there is more to find. Hidden when there are none.
+
+  ![242 not discovered yet bar](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/BuildTracker/screenshots/not-discovered-count.png)
+
 - Built everything? The tab says **"Congrats! You have built every piece of it!"** (or, while some pieces are still undiscovered, that everything discovered so far is built and there
   are more pieces left to discover).
 - Client-side only; works on vanilla servers.

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UnlockAwareness
 {
-    /// <summary>Records newly learned recipes and build pieces as unseen.</summary>
+    /// <summary>Records newly learned recipes, build pieces and items as unseen.</summary>
     [HarmonyPatch]
     internal static class UnlockTrackingPatches
     {
@@ -35,6 +35,74 @@ namespace UnlockAwareness
         {
             if (__state && __instance == Player.m_localPlayer && __instance.IsRecipeKnown(piece.m_name))
                 UnseenStore.MarkUnseen(UnlockKind.Piece, piece.m_name);
+        }
+
+        // The game calls AddKnownItem for everything that lands in the inventory, and only shows its
+        // "new item" message the first time. Items owned before installing are already known, so they stay unmarked.
+        [HarmonyPatch(typeof(Player), nameof(Player.AddKnownItem))]
+        [HarmonyPrefix]
+        private static void AddKnownItem_Prefix(Player __instance, ItemDrop.ItemData item, out bool __state) =>
+            __state = item != null && !__instance.IsKnownMaterial(item.m_shared.m_name);
+
+        [HarmonyPatch(typeof(Player), nameof(Player.AddKnownItem))]
+        [HarmonyPostfix]
+        private static void AddKnownItem_Postfix(Player __instance, ItemDrop.ItemData item, bool __state)
+        {
+            if (__state && UnlockAwarenessPlugin.InventoryBadges.Value && __instance == Player.m_localPlayer)
+                UnseenStore.MarkUnseen(UnlockKind.Item, item.m_shared.m_name);
+        }
+    }
+
+    /// <summary>Badges on new items in the player's inventory grid. Clicking an item clears its badge.</summary>
+    [HarmonyPatch]
+    internal static class InventoryPatches
+    {
+        private static readonly AccessTools.FieldRef<InventoryGrid, List<InventoryElement>> ElementsRef =
+            AccessTools.FieldRefAccess<InventoryGrid, List<InventoryElement>>("m_elements");
+
+        // Runs every frame while the inventory is open, so it only builds keys when something is unseen.
+        [HarmonyPatch(typeof(InventoryGrid), "UpdateGui")]
+        [HarmonyPostfix]
+        private static void UpdateGui_Postfix(InventoryGrid __instance)
+        {
+            if (InventoryGui.instance == null || __instance != InventoryGui.instance.m_playerGrid) return;
+            List<InventoryElement> elements = ElementsRef(__instance);
+            Inventory inventory = __instance.GetInventory();
+            bool show = UnlockAwarenessPlugin.InventoryBadges.Value && UnseenStore.HasAnyUnseen;
+
+            foreach (InventoryElement element in elements)
+            {
+                // Top center: the corners hold the hotbar number, quality and other game markers.
+                UnseenBadge badge = UiFactory.GetOrCreateBadge(element.transform, 18f, new Vector2(0.5f, 1f), new Vector2(0f, -10f));
+                ItemDrop.ItemData item = show && element.m_used ? inventory.GetItemAt(element.Position.x, element.Position.y) : null;
+                if (item != null && UnseenStore.IsUnseen(UnlockKind.Item, item.m_shared.m_name))
+                {
+                    string key = UnseenStore.MakeKey(UnlockKind.Item, item.m_shared.m_name);
+                    if (badge.Key != key) badge.Show(key);
+                }
+                else if (badge.gameObject.activeSelf)
+                {
+                    badge.Hide();
+                }
+            }
+        }
+
+        // Left click (or gamepad select) and right click (use/equip) both count as looking at the item.
+        [HarmonyPatch(typeof(InventoryGui), "OnSelectedItem")]
+        [HarmonyPrefix]
+        private static void OnSelectedItem_Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item) =>
+            MarkSeen(__instance, grid, item);
+
+        [HarmonyPatch(typeof(InventoryGui), "OnRightClickItem")]
+        [HarmonyPrefix]
+        private static void OnRightClickItem_Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item) =>
+            MarkSeen(__instance, grid, item);
+
+        // The badges themselves follow on the next UpdateGui, which also clears other stacks of the same item.
+        private static void MarkSeen(InventoryGui gui, InventoryGrid grid, ItemDrop.ItemData item)
+        {
+            if (item != null && grid == gui.m_playerGrid)
+                UnseenStore.MarkSeen(UnseenStore.MakeKey(UnlockKind.Item, item.m_shared.m_name));
         }
     }
 
