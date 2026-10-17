@@ -13,6 +13,9 @@ time gets an orange **!** marker until you have looked at it.
   marker disappears.
 - **Inventory**: items you pick up for the very first time show a **!** in your inventory. Click the item (or
   right-click to use or equip it) and the marker disappears. Turn it off with `InventoryBadges`.
+
+  ![Stone and wood in the inventory, each with an orange ! marker](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/UnlockAwareness/screenshots/inventory-badges.png)
+
 - **Mark all as seen**: an eye button below the repair button in the crafting panel, and next to the search field in
   the build menu, clears every marker there at once. The tooltip shows how many are left. Dimmed when there is
   nothing new.
