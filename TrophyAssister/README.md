@@ -5,6 +5,10 @@ Client-side trophy helper for Valheim 1.0.
 Every kill that doesn't drop a trophy makes the next one more
 likely ("pity"). When the trophy drops, the counter for that creature resets.
 
+After each kill without a trophy, a message shows your progress:
+
+![Message after a kill: Boar trophy: 1 dry kill, next chance 17 %](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/TrophyAssister/screenshots/pity-progress.png)
+
 ![Trophies tab showing the next-drop chance under each trophy, with undiscovered trophies hidden behind question marks](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/TrophyAssister/screenshots/trophies-tab.png)
 
 ## What counts as your kill
