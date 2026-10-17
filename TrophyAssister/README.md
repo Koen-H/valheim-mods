@@ -9,6 +9,10 @@ After each kill without a trophy, a message shows your progress:
 
 ![Messages after two kills: Neck trophy 1 dry kill, next chance 6 %, then 2 dry kills, next chance 7 %](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/TrophyAssister/screenshots/pity-progress.png)
 
+When the trophy drops thanks to the pity bonus, the message says so:
+
+![Trophy dropped: Neck! (pity roll, after 4 dry kills)](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/TrophyAssister/screenshots/pity-drop.png)
+
 ![Trophies tab showing the next-drop chance under each trophy, with undiscovered trophies hidden behind question marks](https://raw.githubusercontent.com/Koen-H/valheim-mods/main/TrophyAssister/screenshots/trophies-tab.png)
 
 ## What counts as your kill
