@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Added screenshots to the README.
+
 ## 1.0.1
 
 - Updated for Valheim 1.0.20, which raises trophy chances for starred creatures.
