@@ -94,7 +94,39 @@ UNLOCK = f"""
   </g>
 """
 
-ICONS = {"BuildTracker": BUILD, "CraftTracker": CRAFT, "TrophyAssister": TROPHY, "UnlockAwareness": UNLOCK}
+# Two essences (Thunderblood and Frostfire) and a "x2" badge: one share per player.
+ESSENCE = f"""
+  <defs>
+    <radialGradient id="thunder" cx="38%" cy="34%" r="70%">
+      <stop offset="0" stop-color="#ffe7a8"/>
+      <stop offset="0.35" stop-color="#e2453a"/>
+      <stop offset="1" stop-color="#4a0d14"/>
+    </radialGradient>
+    <radialGradient id="frost" cx="38%" cy="34%" r="70%">
+      <stop offset="0" stop-color="#e8fbff"/>
+      <stop offset="0.4" stop-color="#4fb6e8"/>
+      <stop offset="1" stop-color="#0d2a4a"/>
+    </radialGradient>
+  </defs>
+  <circle cx="92" cy="150" r="80" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <circle cx="164" cy="112" r="44" fill="url(#frost)" stroke="#0b1622" stroke-width="4"/>
+    <path d="M150 96 Q164 84 178 96" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  </g>
+  <g filter="url(#shadow)">
+    <circle cx="100" cy="156" r="62" fill="url(#thunder)" stroke="#1a0a0c" stroke-width="4"/>
+    <path d="M110 112 L84 160 L104 160 L92 200 L124 146 L104 146 L116 112 Z" fill="#ffe7a8" stroke="#5a1418"
+          stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#shadow)">
+    <circle cx="196" cy="196" r="30" fill="#ff9e1a" stroke="#1a1410" stroke-width="4"/>
+    <text x="196" y="207" text-anchor="middle" font-family="Georgia, serif" font-weight="bold" font-size="30"
+          fill="#1a1410">&#215;2</text>
+  </g>
+"""
+
+ICONS = {"BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "TrophyAssister": TROPHY,
+         "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():
     with open(os.path.join(ROOT, mod, "icon.svg"), "w", encoding="utf-8", newline="\n") as f:
