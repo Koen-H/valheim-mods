@@ -87,17 +87,20 @@ Type these in chat with a leading `/` (or in the F5 console without it). They're
 | Pity | RareGrowthPerKill | 0.20 | Compound: growth per dry kill for rare trophies |
 | Pity | FlatBonusPerKill | 0.05 | Flat: added per dry kill |
 | Pity | GuaranteeAfterKills | 0 | Hard pity (0 = off) |
-| Pity | OnlyCountMyKills | true | Only your kills (see above) add pity |
+| Pity | OnlyCountMyKills | true | Only your kills (see above) add pity; other players' kills always count for them |
 | Trophy list | ShowChances | true | Chance + dry kills on each trophy |
 | Trophy list | ShowMissing | true | Add uncollected trophies |
 | Trophy list | SpoilerFree | true | Hide never-killed trophies behind "?" |
 | Trophy list | HiddenTrophies | TrophyDeerWhite | Trophies never added as missing |
 
-## Client-side notes
-- No server install, no RPCs, no version check: works on vanilla servers, and other players
-  don't need it.
-- Loot is rolled by the game that "owns" the creature. Solo you always own it. In multiplayer,
-  a creature owned by a friend's game rolls with normal chances (and won't add pity).
+## Multiplayer
+- No server install: works on vanilla servers.
+- Loot is rolled by the game that "owns" the creature, usually the player closest to it. When
+  you kill a creature a friend's game owns, their game sends you the result and **you** get the
+  pity roll, your counter and the messages, as if you owned it. If the pity roll hits, your game
+  drops the trophy where the creature died.
+- For that, the player who owns the creature needs the mod too. If they don't, the kill rolls
+  with normal chances and doesn't add pity. Players without the mod are otherwise unaffected.
 - Valheim 1.0 blocks achievements for characters/worlds flagged for cheating. This mod uses
   no cheat commands and doesn't spawn items out of thin air (a pity drop is added to the
-  creature's normal loot), but Iron Gate hasn't said exactly which mods count.
+  creature's normal loot, or dropped where it died), but Iron Gate hasn't said exactly which mods count.

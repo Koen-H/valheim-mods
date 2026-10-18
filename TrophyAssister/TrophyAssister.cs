@@ -1,7 +1,9 @@
 // TrophyAssister - client-side trophy drop helper for Valheim 1.0 (Unity 6, BepInEx 5.4.23+)
 //
-// Everything runs on YOUR game only: no RPCs, no server component, no version
-// handshake, so it works on vanilla servers and other players don't need it.
+// Nothing runs on the server, so it works on vanilla servers. The only network
+// traffic is one message per kill between players: drops are rolled by the game
+// that owns the creature, and when that isn't the killer's game, the owner sends
+// the result to the killer, who rolls their own pity (see TrophyNet).
 //
 // Pity system: every kill of a creature that does NOT drop its trophy adds a
 // bonus to that creature's next trophy chance. When the trophy drops, the
@@ -106,7 +108,8 @@ namespace TrophyAssister
                     new AcceptableValueRange<int>(0, 1000)));
             OnlyCountMyKills = Config.Bind("3 - Pity", "OnlyCountMyKills", true,
                 "Only your kills add pity: your last hit, a burn/poison tick after your hit, or a kill by your " +
-                "summons and tamed creatures following you. Turn off to count kills by anyone your game processes.");
+                "summons and tamed creatures following you. Kills by other players always count for them. " +
+                "Turn off to also count kills by creatures and traps on creatures your game owns.");
 
             ShowChancesInList = Config.Bind("4 - Trophy list", "ShowChances", true,
                 "Show the current drop chance and dry-kill count on each trophy in the Trophies tab.");
@@ -125,6 +128,7 @@ namespace TrophyAssister
             Patcher.SafePatch(_harmony, typeof(KillCredit));
             Patcher.SafePatch(_harmony, typeof(GenerateDropListPatch));
             Patcher.SafePatch(_harmony, typeof(TrophyListPatch));
+            Patcher.SafePatch(_harmony, typeof(TrophyNet));
             Commands.Register();
 
             Logger.LogInfo($"{ModName} {ModVersion} loaded (client-side).");
@@ -150,7 +154,7 @@ namespace TrophyAssister
     [HarmonyPatch]
     internal static class GenerateDropListPatch
     {
-        private class Entry
+        internal class Entry
         {
             public CharacterDrop.Drop Drop;
             public float BaseChance; // drop.m_chance, 0-star
@@ -158,13 +162,18 @@ namespace TrophyAssister
             public float Target;     // boosted chance we want in total
         }
 
-        private class State
+        internal class State
         {
             public string CharKey;
-            public string CreatureKey;
+            public string CreatureKey; // null = this kill doesn't count for pity
             public string CreatureName;
             public int LevelMultiplier;
             public readonly List<Entry> Trophies = new List<Entry>();
+
+            // Another player's kill: we only send them what the game dropped.
+            public long HandOffTo;
+            public string HandOffCreature;
+            public int HandOffLevel;
         }
 
         private static bool Prepare() => TargetMethod() != null;
@@ -179,51 +188,32 @@ namespace TrophyAssister
             {
                 if (!TrophyAssisterPlugin.Enabled.Value || __instance == null || __instance.m_drops == null) return;
 
-                var player = Player.m_localPlayer;
-                if (player == null) return;
+                if (Player.m_localPlayer == null) return;
 
                 var character = __instance.GetComponent<Character>();
-                bool countPity = TrophyAssisterPlugin.PityEnabled.Value &&
-                                 (!TrophyAssisterPlugin.OnlyCountMyKills.Value || KillCredit.ByLocalPlayer(character));
-
-                string charKey = GameUtil.CharKey(player);
-                if (charKey == null) return;
-
                 string creatureKey = GameUtil.PrefabName(__instance.gameObject);
                 int level = character != null ? character.GetLevel() : 1;
+                long killer = KillCredit.Killer(character);
+
+                if (killer != 0 && killer != ZDOMan.GetSessionID())
+                {
+                    if (TrophyAssisterPlugin.LogKills.Value)
+                        TrophyAssisterPlugin.Log.LogInfo(
+                            $"Kill: {creatureKey} ({level - 1} star), last hit by {KillCredit.LastAttackerName(character)}, " +
+                            "another player's kill: sent to them");
+                    __state = new State { HandOffTo = killer, HandOffCreature = creatureKey, HandOffLevel = level };
+                    return;
+                }
+
+                bool countPity = TrophyAssisterPlugin.PityEnabled.Value &&
+                                 (!TrophyAssisterPlugin.OnlyCountMyKills.Value || killer != 0);
                 if (TrophyAssisterPlugin.LogKills.Value)
                     TrophyAssisterPlugin.Log.LogInfo(
                         $"Kill: {creatureKey} ({level - 1} star), last hit by {KillCredit.LastAttackerName(character)}, " +
                         $"counts for pity: {countPity}");
-                int levelMult = Mathf.Max(1, (int)Mathf.Pow(2f, level - 1)); // same as the game
-                float starMult = Mathf.Max(levelMult, Mathf.Pow(TrophyAssisterPlugin.StarChanceMultiplier.Value, level - 1));
-                HashSet<string> owned = null;
 
-                foreach (var drop in __instance.m_drops)
-                {
-                    if (drop == null || !GameUtil.IsTrophy(drop.m_prefab, out _)) continue;
-                    if (TrophyAssisterPlugin.OnlyUncollected.Value)
-                    {
-                        owned = owned ?? new HashSet<string>(player.GetTrophies());
-                        if (owned.Contains(drop.m_prefab.name)) continue;
-                    }
-
-                    int dry = countPity ? PityStore.Get(charKey, creatureKey) : 0;
-                    float vanilla = Mathf.Clamp01(drop.m_chance * (drop.m_levelMultiplier ? levelMult : 1));
-                    float target = Mathf.Clamp01(Chance.Next(drop.m_chance, dry) * (drop.m_levelMultiplier ? starMult : 1));
-                    if (target <= vanilla && !countPity) continue;
-
-                    if (__state == null)
-                        __state = new State
-                        {
-                            CharKey = charKey,
-                            CreatureKey = countPity ? creatureKey : null,
-                            CreatureName = character != null ? GameUtil.Localize(character.m_name) : creatureKey,
-                            LevelMultiplier = levelMult
-                        };
-
-                    __state.Trophies.Add(new Entry { Drop = drop, BaseChance = drop.m_chance, Vanilla = vanilla, Target = target });
-                }
+                string name = character != null ? GameUtil.Localize(character.m_name) : creatureKey;
+                __state = Build(__instance.m_drops, creatureKey, name, level, countPity);
             }
             catch (Exception e)
             {
@@ -231,59 +221,118 @@ namespace TrophyAssister
             }
         }
 
-        private static void Postfix(State __state, List<KeyValuePair<GameObject, int>> __result)
+        private static void Postfix(CharacterDrop __instance, State __state, List<KeyValuePair<GameObject, int>> __result)
         {
             if (__state == null || __result == null) return;
 
             try
             {
                 var dropped = new HashSet<string>(__result.Where(kv => kv.Key != null).Select(kv => kv.Key.name));
-                bool gotTrophy = __state.Trophies.Any(t => dropped.Contains(t.Drop.m_prefab.name));
-                bool byPity = false;
-
-                // The game's roll missed: roll the pity bonus. P(game) + P(miss) * bonus = target.
-                if (!gotTrophy)
+                if (__state.HandOffTo != 0)
                 {
-                    foreach (var t in __state.Trophies)
-                    {
-                        if (t.Target <= t.Vanilla || t.Vanilla >= 1f) continue;
-                        float bonus = (t.Target - t.Vanilla) / (1f - t.Vanilla);
-                        if (UnityEngine.Random.value >= bonus) continue;
-
-                        __result.Add(new KeyValuePair<GameObject, int>(t.Drop.m_prefab, Amount(t.Drop, __state.LevelMultiplier)));
-                        gotTrophy = byPity = true;
-                        break;
-                    }
+                    TrophyNet.SendKill(__state.HandOffTo, __state.HandOffCreature, __state.HandOffLevel,
+                        TrophyNet.DropCenter(__instance), dropped);
+                    return;
                 }
 
-                if (gotTrophy)
-                {
-                    string how = byPity ? "pity roll" : null;
-                    if (__state.CreatureKey != null)
-                    {
-                        int tries = PityStore.Get(__state.CharKey, __state.CreatureKey);
-                        PityStore.Reset(__state.CharKey, __state.CreatureKey);
-                        if (tries > 0) how = (how != null ? how + ", " : "") + $"after {tries} dry kill{(tries == 1 ? "" : "s")}";
-                    }
-                    if (TrophyAssisterPlugin.NotifyOnDrop.Value)
-                        Hud.Center($"Trophy dropped: {__state.CreatureName}!" + (how != null ? $"  ({how})" : ""));
-                    if (TrophyAssisterPlugin.LogKills.Value)
-                        TrophyAssisterPlugin.Log.LogInfo($"  -> trophy dropped ({(byPity ? "pity roll" : "game roll")})");
-                }
-                else if (__state.CreatureKey != null)
-                {
-                    int dry = PityStore.Increment(__state.CharKey, __state.CreatureKey);
-                    float next = Chance.Next(__state.Trophies[0].BaseChance, dry);
-                    if (TrophyAssisterPlugin.LogKills.Value)
-                        TrophyAssisterPlugin.Log.LogInfo($"  -> no trophy, dry kills = {dry}, next chance {next:P0} (0 star)");
-                    if (TrophyAssisterPlugin.ShowPityProgress.Value)
-                        PityLabel.Show($"{__state.CreatureName} trophy: {dry} dry kill{(dry == 1 ? "" : "s")}, next chance {next:P0}");
-                }
+                var extra = Resolve(__state, dropped);
+                if (extra.Key != null) __result.Add(extra);
             }
             catch (Exception e)
             {
                 TrophyAssisterPlugin.Log.LogWarning($"Postfix error: {e.Message}");
             }
+        }
+
+        // The trophies in this drop list we boost or count pity for, with their chances
+        // for the local character. Null when there's nothing to do.
+        internal static State Build(List<CharacterDrop.Drop> drops, string creatureKey, string creatureName,
+            int level, bool countPity)
+        {
+            var player = Player.m_localPlayer;
+            string charKey = GameUtil.CharKey(player);
+            if (player == null || charKey == null || drops == null) return null;
+
+            int levelMult = Mathf.Max(1, (int)Mathf.Pow(2f, level - 1)); // same as the game
+            float starMult = Mathf.Max(levelMult, Mathf.Pow(TrophyAssisterPlugin.StarChanceMultiplier.Value, level - 1));
+            HashSet<string> owned = null;
+            State state = null;
+
+            foreach (var drop in drops)
+            {
+                if (drop == null || !GameUtil.IsTrophy(drop.m_prefab, out _)) continue;
+                if (TrophyAssisterPlugin.OnlyUncollected.Value)
+                {
+                    owned = owned ?? new HashSet<string>(player.GetTrophies());
+                    if (owned.Contains(drop.m_prefab.name)) continue;
+                }
+
+                int dry = countPity ? PityStore.Get(charKey, creatureKey) : 0;
+                float vanilla = Mathf.Clamp01(drop.m_chance * (drop.m_levelMultiplier ? levelMult : 1));
+                float target = Mathf.Clamp01(Chance.Next(drop.m_chance, dry) * (drop.m_levelMultiplier ? starMult : 1));
+                if (target <= vanilla && !countPity) continue;
+
+                if (state == null)
+                    state = new State
+                    {
+                        CharKey = charKey,
+                        CreatureKey = countPity ? creatureKey : null,
+                        CreatureName = creatureName,
+                        LevelMultiplier = levelMult
+                    };
+
+                state.Trophies.Add(new Entry { Drop = drop, BaseChance = drop.m_chance, Vanilla = vanilla, Target = target });
+            }
+            return state;
+        }
+
+        // After the game's roll (`dropped` = prefab names it dropped): rolls the pity bonus,
+        // updates the counter and shows the messages. Returns the trophy to add, if any.
+        internal static KeyValuePair<GameObject, int> Resolve(State state, ICollection<string> dropped)
+        {
+            var extra = default(KeyValuePair<GameObject, int>);
+            bool gotTrophy = state.Trophies.Any(t => dropped.Contains(t.Drop.m_prefab.name));
+            bool byPity = false;
+
+            // The game's roll missed: roll the pity bonus. P(game) + P(miss) * bonus = target.
+            if (!gotTrophy)
+            {
+                foreach (var t in state.Trophies)
+                {
+                    if (t.Target <= t.Vanilla || t.Vanilla >= 1f) continue;
+                    float bonus = (t.Target - t.Vanilla) / (1f - t.Vanilla);
+                    if (UnityEngine.Random.value >= bonus) continue;
+
+                    extra = new KeyValuePair<GameObject, int>(t.Drop.m_prefab, Amount(t.Drop, state.LevelMultiplier));
+                    gotTrophy = byPity = true;
+                    break;
+                }
+            }
+
+            if (gotTrophy)
+            {
+                string how = byPity ? "pity roll" : null;
+                if (state.CreatureKey != null)
+                {
+                    int tries = PityStore.Get(state.CharKey, state.CreatureKey);
+                    PityStore.Reset(state.CharKey, state.CreatureKey);
+                    if (tries > 0) how = (how != null ? how + ", " : "") + $"after {tries} dry kill{(tries == 1 ? "" : "s")}";
+                }
+                if (TrophyAssisterPlugin.NotifyOnDrop.Value)
+                    Hud.Center($"Trophy dropped: {state.CreatureName}!" + (how != null ? $"  ({how})" : ""));
+                if (TrophyAssisterPlugin.LogKills.Value)
+                    TrophyAssisterPlugin.Log.LogInfo($"  -> trophy dropped ({(byPity ? "pity roll" : "game roll")})");
+            }
+            else if (state.CreatureKey != null)
+            {
+                int dry = PityStore.Increment(state.CharKey, state.CreatureKey);
+                float next = Chance.Next(state.Trophies[0].BaseChance, dry);
+                if (TrophyAssisterPlugin.LogKills.Value)
+                    TrophyAssisterPlugin.Log.LogInfo($"  -> no trophy, dry kills = {dry}, next chance {next:P0} (0 star)");
+                if (TrophyAssisterPlugin.ShowPityProgress.Value)
+                    PityLabel.Show($"{state.CreatureName} trophy: {dry} dry kill{(dry == 1 ? "" : "s")}, next chance {next:P0}");
+            }
+            return extra;
         }
 
         // Same amount the game would have dropped for this entry.
@@ -299,14 +348,14 @@ namespace TrophyAssister
     }
 
     // Who gets credit for a kill. Burning/poison ticks carry no attacker, so the
-    // killing blow alone can't tell us. Instead we remember, per creature, whether
-    // the last damaging hit that DID have an attacker came from you or your summon.
+    // killing blow alone can't tell us. Instead we remember, per creature, which
+    // player (or player's summon) landed the last damaging hit that DID have an attacker.
     // Character.ApplyDamage runs on the creature's owner, the same game that rolls
     // its drops.
     [HarmonyPatch]
     internal static class KillCredit
     {
-        private class Credit { public bool Mine; public string Who; }
+        private class Credit { public long Peer; public string Who; }
         private static readonly ConditionalWeakTable<Character, Credit> LastAttacker =
             new ConditionalWeakTable<Character, Credit>();
 
@@ -323,16 +372,17 @@ namespace TrophyAssister
                 var attacker = hit.GetAttacker();
                 if (attacker == null) return; // attacker gone (e.g. unsummoned) - keep the previous credit
                 var credit = LastAttacker.GetOrCreateValue(__instance);
-                credit.Mine = GameUtil.IsMeOrMySummon(attacker);
+                credit.Peer = GameUtil.PlayerPeer(attacker);
                 if (TrophyAssisterPlugin.LogKills.Value) credit.Who = attacker.m_name;
             }
             catch { /* never interfere with damage */ }
         }
 
-        public static bool ByLocalPlayer(Character victim)
+        // The game session of the player who gets the kill (see GameUtil.PlayerPeer). 0 = no player.
+        public static long Killer(Character victim)
         {
-            if (victim != null && LastAttacker.TryGetValue(victim, out var credit)) return credit.Mine;
-            return GameUtil.LastHitByLocalPlayer(victim); // e.g. creature changed owner mid-fight
+            if (victim != null && LastAttacker.TryGetValue(victim, out var credit)) return credit.Peer;
+            return GameUtil.LastHitPeer(victim); // e.g. creature changed owner mid-fight
         }
 
         // For the kill log: who got the credit-deciding hit.
@@ -340,6 +390,75 @@ namespace TrophyAssister
             victim != null && LastAttacker.TryGetValue(victim, out var credit) && credit.Who != null
                 ? GameUtil.Localize(credit.Who)
                 : "unknown (no tracked hit)";
+    }
+
+    // Kills of creatures another player's game owns. The owner's game rolls the drops,
+    // so it sends the killer the creature and what the game dropped; the killer rolls
+    // their own pity and spawns the trophy. Both need the mod: without it on the owner's
+    // side the kill is vanilla, without it on the killer's side the message is ignored.
+    [HarmonyPatch(typeof(Game), "Start")]
+    internal static class TrophyNet
+    {
+        private const string RpcKill = "TrophyAssister_Kill";
+
+        private static void Postfix()
+        {
+            try { ZRoutedRpc.instance?.Register<ZPackage>(RpcKill, OnKill); }
+            catch (Exception e) { TrophyAssisterPlugin.Log.LogWarning($"Couldn't register kill message: {e.Message}"); }
+        }
+
+        // Same spot the game drops loot.
+        public static Vector3 DropCenter(CharacterDrop drop)
+        {
+            var character = drop.GetComponent<Character>();
+            Vector3 center = character != null ? character.GetCenterPoint() : drop.transform.position;
+            return center + drop.transform.TransformVector(drop.m_spawnOffset);
+        }
+
+        public static void SendKill(long peer, string creatureKey, int level, Vector3 center, IEnumerable<string> dropped)
+        {
+            if (ZRoutedRpc.instance == null) return;
+            var pkg = new ZPackage();
+            pkg.Write(creatureKey);
+            pkg.Write(level);
+            pkg.Write(center);
+            pkg.Write(string.Join(",", dropped));
+            ZRoutedRpc.instance.InvokeRoutedRPC(peer, RpcKill, pkg);
+        }
+
+        private static void OnKill(long sender, ZPackage pkg)
+        {
+            try
+            {
+                if (!TrophyAssisterPlugin.Enabled.Value || ZNetScene.instance == null) return;
+                string creatureKey = pkg.ReadString();
+                int level = pkg.ReadInt();
+                Vector3 center = pkg.ReadVector3();
+                var dropped = new HashSet<string>(pkg.ReadString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+
+                var prefab = ZNetScene.instance.GetPrefab(creatureKey);
+                var drops = prefab != null ? prefab.GetComponent<CharacterDrop>() : null;
+                if (drops == null) return;
+                var character = prefab.GetComponent<Character>();
+
+                bool countPity = TrophyAssisterPlugin.PityEnabled.Value;
+                if (TrophyAssisterPlugin.LogKills.Value)
+                    TrophyAssisterPlugin.Log.LogInfo(
+                        $"Kill: {creatureKey} ({level - 1} star), your kill on another player's game, counts for pity: {countPity}");
+
+                string name = character != null ? GameUtil.Localize(character.m_name) : creatureKey;
+                var state = GenerateDropListPatch.Build(drops.m_drops, creatureKey, name, level, countPity);
+                if (state == null) return;
+
+                var extra = GenerateDropListPatch.Resolve(state, dropped);
+                if (extra.Key != null)
+                    CharacterDrop.DropItems(new List<KeyValuePair<GameObject, int>> { extra }, center, 0.5f, false);
+            }
+            catch (Exception e)
+            {
+                TrophyAssisterPlugin.Log.LogWarning($"Kill message error: {e.Message}");
+            }
+        }
     }
 
     public enum PityMode { Compound, Flat }
@@ -385,39 +504,53 @@ namespace TrophyAssister
                    item.m_itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Trophy;
         }
 
-        public static bool LastHitByLocalPlayer(Character character)
+        public static long LastHitPeer(Character character)
         {
-            if (character == null || Player.m_localPlayer == null || LastHitField == null) return true;
+            long me = ZDOMan.GetSessionID();
+            if (character == null || LastHitField == null) return me;
             try
             {
                 if (LastHitField.GetValue(character) is HitData hit)
-                    return IsMeOrMySummon(hit.GetAttacker());
-                return false;
+                    return PlayerPeer(hit.GetAttacker());
+                return 0;
             }
-            catch { return true; } // can't tell -> don't block pity
+            catch { return me; } // can't tell -> don't block pity
         }
 
-        // You, or one of your summons: tamed creatures (Dead Raiser skeletons, summoned
-        // trolls, tamed wolves) and player-spawned creatures that are friendly without
-        // being tamed (Staff of the Wild roots).
-        public static bool IsMeOrMySummon(Character attacker)
+        // The game session (peer ID) of the player an attacker belongs to: the player
+        // themselves, or the owner of a summon - tamed creatures (Dead Raiser skeletons,
+        // summoned trolls, tamed wolves) and player-spawned creatures that are friendly
+        // without being tamed (Staff of the Wild roots). 0 = not a player's.
+        public static long PlayerPeer(Character attacker)
         {
-            var me = Player.m_localPlayer;
-            if (attacker == null || me == null) return false;
-            if (attacker == me) return true;
-            if (!attacker.IsTamed() && attacker.GetFaction() != Character.Faction.PlayerSpawned) return false;
+            if (attacker == null) return 0;
+            if (attacker is Player) return Owner(attacker);
+            if (!attacker.IsTamed() && attacker.GetFaction() != Character.Faction.PlayerSpawned) return 0;
 
             var ai = attacker.GetComponent<MonsterAI>();
-            if (ai != null && ai.GetFollowTarget() == me.gameObject) return true;
+            var target = ai != null ? ai.GetFollowTarget() : null;
+            var followed = target != null ? target.GetComponent<Player>() : null;
+            if (followed != null) return Owner(followed);
 
             var nview = attacker.GetComponent<ZNetView>();
-            if (nview == null || !nview.IsValid()) return false;
+            if (nview == null || !nview.IsValid()) return 0;
             string follow = nview.GetZDO().GetString(ZDOVars.s_follow);
-            if (follow.Length > 0) return follow == me.GetPlayerName();
+            if (follow.Length > 0)
+            {
+                var player = Player.GetAllPlayers().FirstOrDefault(p => p != null && p.GetPlayerName() == follow);
+                return player != null ? Owner(player) : 0;
+            }
 
-            // Not following anyone (roots, summons told to stay): it's yours if your game
-            // controls it - new objects belong to the game that spawned them.
-            return nview.IsOwner();
+            // Not following anyone (roots, summons told to stay): it belongs to the game
+            // that controls it - new objects belong to the game that spawned them.
+            return nview.GetZDO().GetOwner();
+        }
+
+        // A player's own game always owns their character.
+        private static long Owner(Character c)
+        {
+            var nview = c.GetComponent<ZNetView>();
+            return nview != null && nview.IsValid() ? nview.GetZDO().GetOwner() : 0;
         }
 
         public static string PrefabName(GameObject go)
