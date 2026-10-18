@@ -24,12 +24,12 @@ committed). The mods themselves can't be built on GitHub, so build and test in g
 2. Dry run (builds, packs and checks; publishes nothing): `.\release.ps1 <Mod>`
 3. Commit and push to `main`, then: `.\release.ps1 <Mod> -Publish`
    This creates the GitHub Release `<Mod>-v<version>` with the zip attached.
-4. The **Publish to Thunderstore** action checks the zip again and waits for approval under
-   *Actions*. Approve it to upload.
+4. The **Publish to Thunderstore** action checks the zip again and uploads it to Thunderstore. Follow it
+   under *Actions*.
 
 One-time setup: GitHub CLI (`winget install GitHub.cli`, `gh auth login`); a GitHub environment
-`thunderstore` with yourself as required reviewer and the secret `THUNDERSTORE_TOKEN` (a Thunderstore
-service-account token of the `koendertjh` team).
+`thunderstore` with the secret `THUNDERSTORE_TOKEN` (a Thunderstore service-account token of the
+`koendertjh` team).
 
 A published Thunderstore version can't be changed: README fixes for a mod need a new version.
 This repo's own README can be changed any time.

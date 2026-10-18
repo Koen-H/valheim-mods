@@ -2,8 +2,8 @@
 #
 # The mods are built on the developer's PC (they compile against Valheim's own DLLs, which can't be on
 # GitHub), so this workflow never builds: it checks the attached zip and uploads it.
-# The upload job runs in the "thunderstore" environment, which requires a manual approval on GitHub and
-# holds the THUNDERSTORE_TOKEN secret.
+# The upload job runs in the "thunderstore" environment, which holds the THUNDERSTORE_TOKEN secret. It has no
+# approval step: a release made by release.ps1 -Publish is uploaded right after the package check passes.
 #
 # Run it by hand (Actions > Publish to Thunderstore > Run workflow) to re-check a release's package,
 # or to retry an upload with "publish" ticked.
