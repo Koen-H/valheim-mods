@@ -1,0 +1,9 @@
+{
+  "name": "MaterialTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "A Materials window next to Trophies: every crafting material, which ones you have found, and where to find the rest. Revealed one boss at a time.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

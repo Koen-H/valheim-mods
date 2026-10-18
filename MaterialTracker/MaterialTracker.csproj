@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared settings, common references and the deploy step are in ..\Directory.Build.props and .targets.
+       The version comes from manifest.json. -->
+  <PropertyGroup>
+    <AssemblyName>MaterialTracker</AssemblyName>
+    <RootNamespace>MaterialTracker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\BossProgress.cs" Link="Shared\BossProgress.cs" />
+    <Compile Include="..\Shared\Stages.cs" Link="Shared\Stages.cs" />
+    <Compile Include="..\Shared\InventoryWindow.cs" Link="Shared\InventoryWindow.cs" />
+    <Compile Include="..\Shared\ShapeIcon.cs" Link="Shared\ShapeIcon.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(ManagedDir)\assembly_guiutils.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\assembly_utils.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\Unity.TextMeshPro.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.InputLegacyModule.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

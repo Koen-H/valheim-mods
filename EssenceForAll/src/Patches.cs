@@ -19,12 +19,23 @@ namespace EssenceForAll
         {
             if (__instance.IsPlayer()) return;
             CharacterDrop drops = __instance.GetComponent<CharacterDrop>();
-            if (drops == null || !drops.m_drops.Any(EssenceForAllPlugin.IsEssence)) return;
+            if (drops == null || !DropsEssence(drops)) return;
 
             ZNetView nview = __instance.GetComponent<ZNetView>();
             ZDO zdo = nview != null && nview.IsValid() ? nview.GetZDO() : null;
             if (zdo == null || !nview.IsOwner() || zdo.GetInt(PlayersKey) > 0) return;
             zdo.Set(PlayersKey, CountPlayers(__instance.transform.position));
+        }
+
+        // Runs for every creature that spawns or loads, so a plain loop instead of LINQ with a new delegate.
+        private static bool DropsEssence(CharacterDrop drops)
+        {
+            foreach (CharacterDrop.Drop drop in drops.m_drops)
+            {
+                if (EssenceForAllPlugin.IsEssence(drop))
+                    return true;
+            }
+            return false;
         }
 
         internal static int CountPlayers(Vector3 position)

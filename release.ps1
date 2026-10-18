@@ -7,8 +7,7 @@
     dist\koendertjh-<Mod>-<version>.zip and checks the zip. Nothing leaves the PC.
 
     With -Publish it then creates a GitHub Release "<Mod>-v<version>" with the zip attached. The
-    GitHub Action checks the zip again and waits for your approval on GitHub before it uploads
-    to Thunderstore.
+    GitHub Action checks the zip again and uploads it to Thunderstore.
 
     The version comes from <Mod>\manifest.json. Bump it there and add a matching section to
     <Mod>\CHANGELOG.md before publishing.
@@ -105,7 +104,7 @@ foreach ($p in $packages) {
     Get-ChangelogSection (Join-Path $p.Dir 'CHANGELOG.md') $p.Version | Out-Null
 }
 
-Write-Host "`nAbout to create GitHub releases (Thunderstore upload follows after your approval on GitHub):"
+Write-Host "`nAbout to create GitHub releases (each is uploaded to Thunderstore right after):"
 $packages | ForEach-Object { Write-Host "  $($_.Tag)" }
 if (-not $Yes) {
     $answer = Read-Host 'Continue? (y/n)'
@@ -119,4 +118,4 @@ foreach ($p in $packages) {
 }
 
 $repo = gh repo view --json url --jq .url
-Write-Host "`nReleased. Approve the Thunderstore upload at $repo/actions" -ForegroundColor Green
+Write-Host "`nReleased. Follow the Thunderstore upload at $repo/actions" -ForegroundColor Green

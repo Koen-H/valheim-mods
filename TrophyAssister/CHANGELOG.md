@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+- Performance: dry kills are saved 30 seconds after a change, on logout and when the game closes, instead of
+  writing the file on every kill.
+- Performance: the dry-kill message below the top-left messages only redraws when it changes.
+
 ## 1.1.0
 
 - Multiplayer: the pity roll now goes to the player who got the kill, also when the creature is owned by

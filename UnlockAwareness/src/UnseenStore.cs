@@ -23,6 +23,12 @@ namespace UnlockAwareness
         private static readonly HashSet<string> s_unseen = new HashSet<string>();
         private static Player s_owner;
 
+        // Unseen item names without their "i:" prefix, for the inventory badges that look items up every frame.
+        // Rebuilt when the unseen set changed (s_version).
+        private static readonly HashSet<string> s_items = new HashSet<string>();
+        private static int s_version;
+        private static int s_itemsVersion = -1;
+
         public static event Action Changed;
 
         public static string MakeKey(UnlockKind kind, string name) =>
@@ -33,6 +39,22 @@ namespace UnlockAwareness
 
         public static bool IsUnseen(UnlockKind kind, string name) =>
             Sync() && s_unseen.Contains(MakeKey(kind, name));
+
+        /// <summary>Same as IsUnseen for an item, without building its key.</summary>
+        public static bool IsUnseenItem(string name)
+        {
+            if (!Sync()) return false;
+            if (s_itemsVersion != s_version)
+            {
+                s_items.Clear();
+                foreach (string key in s_unseen)
+                {
+                    if (key.StartsWith("i:", StringComparison.Ordinal)) s_items.Add(key.Substring(2));
+                }
+                s_itemsVersion = s_version;
+            }
+            return s_items.Contains(name);
+        }
 
         public static void MarkUnseen(UnlockKind kind, string name)
         {
@@ -71,6 +93,7 @@ namespace UnlockAwareness
 
             s_owner = player;
             s_unseen.Clear();
+            s_version++;
             if (player.m_customData.TryGetValue(CustomDataKey, out string raw) && !string.IsNullOrEmpty(raw))
             {
                 foreach (string key in raw.Split(Separator))
@@ -83,6 +106,7 @@ namespace UnlockAwareness
 
         private static void Save()
         {
+            s_version++;
             if (s_unseen.Count == 0)
                 s_owner.m_customData.Remove(CustomDataKey);
             else

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Performance: the inventory and chest markers do much less work every frame while the inventory is open.
+
 ## 1.2.0
 
 - New: opening a chest (or other container) counts as having the items inside. Your character learns them as if

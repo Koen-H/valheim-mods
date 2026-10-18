@@ -1,0 +1,9 @@
+{
+  "name": "BestiaryTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "A Bestiary window with every creature to slay for The Hunter, and a marker above creatures you have never slain. Revealed one boss at a time.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

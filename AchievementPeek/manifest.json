@@ -1,0 +1,9 @@
+{
+  "name": "AchievementPeek",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "See what the achievement screen hides: the foods, creatures, fish and deaths you're still missing, your real progress, and secret achievements, with spoiler control.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

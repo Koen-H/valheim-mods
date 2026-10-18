@@ -1,0 +1,9 @@
+{
+  "name": "ComfortHelper",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "A Comfort tab in the build menu with check marks on what already counts nearby, and tips on what would raise your comfort, for Comfort is King.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

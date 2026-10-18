@@ -12,13 +12,23 @@ import zipfile
 
 NAMESPACE = "koendertjh"
 CATEGORIES = {
+    "AchievementPeek": ["mods", "client-side", "utility", "ai-generated"],
+    "BestiaryTracker": ["mods", "client-side", "utility", "ai-generated"],
     "BossReset": ["mods", "client-side", "tweaks", "utility", "ai-generated"],
     "BuildTracker": ["mods", "client-side", "building", "utility", "ai-generated"],
+    "ComfortHelper": ["mods", "client-side", "building", "utility", "ai-generated"],
     "CraftTracker": ["mods", "client-side", "crafting", "utility", "ai-generated"],
     "EssenceForAll": ["mods", "client-side", "tweaks", "ai-generated"],
+    "FishTracker": ["mods", "client-side", "crafting", "tweaks", "utility", "ai-generated"],
+    "FoodTracker": ["mods", "client-side", "utility", "ai-generated"],
+    "MaterialTracker": ["mods", "client-side", "crafting", "utility", "ai-generated"],
+    "MerchantTracker": ["mods", "client-side", "utility", "ai-generated"],
+    "ModdedAchievements": ["mods", "client-side", "tweaks", "ai-generated"],
+    "PeakFinder": ["mods", "client-side", "building", "utility", "ai-generated"],
     "SummonTweaks": ["mods", "client-side", "tweaks", "ai-generated"],
     "TrophyAssister": ["mods", "client-side", "tweaks", "utility", "ai-generated"],
     "UnlockAwareness": ["mods", "client-side", "crafting", "building", "utility", "ai-generated"],
+    "WorldSeed": ["mods", "client-side", "utility", "ai-generated"],
 }
 
 

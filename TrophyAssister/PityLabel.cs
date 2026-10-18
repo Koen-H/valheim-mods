@@ -6,7 +6,7 @@
 // shows the last few updates, and fades each one out after a few seconds.
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -18,14 +18,18 @@ namespace TrophyAssister
         private const float FadeSeconds = 1f;
         private const int MaxLines = 3;
 
-        private class Line { public string Text; public float Until; }
+        private class Line { public string Text; public float Until; public int Alpha = -1; }
         private static readonly List<Line> Lines = new List<Line>();
+        private static readonly StringBuilder Text = new StringBuilder();
         private static TMP_Text _label;
+        // Set when lines were added or removed: the text must be rebuilt even if no alpha changed.
+        private static bool _changed;
 
         public static void Show(string text)
         {
             Lines.Add(new Line { Text = text, Until = Time.time + ShowSeconds });
             if (Lines.Count > MaxLines) Lines.RemoveAt(0);
+            _changed = true;
             Refresh();
         }
 
@@ -33,7 +37,12 @@ namespace TrophyAssister
         public static void Tick()
         {
             if (Lines.Count == 0) return;
-            Lines.RemoveAll(l => l.Until <= Time.time);
+            for (int i = Lines.Count - 1; i >= 0; i--)
+            {
+                if (Lines[i].Until > Time.time) continue;
+                Lines.RemoveAt(i);
+                _changed = true;
+            }
             Refresh();
         }
 
@@ -46,11 +55,27 @@ namespace TrophyAssister
             if (label.gameObject.activeSelf != show) label.gameObject.SetActive(show);
             if (!show) return;
 
-            label.text = string.Join("\n", Lines.Select(l =>
+            // Only the last second of a line fades; before that nothing changes and the text stays as it is.
+            bool changed = _changed;
+            foreach (Line line in Lines)
             {
-                int alpha = Mathf.RoundToInt(Mathf.Clamp01((l.Until - Time.time) / FadeSeconds) * 255f);
-                return $"<alpha=#{alpha:X2}>{l.Text}";
-            }));
+                int alpha = Mathf.RoundToInt(Mathf.Clamp01((line.Until - Time.time) / FadeSeconds) * 255f);
+                if (alpha != line.Alpha)
+                {
+                    line.Alpha = alpha;
+                    changed = true;
+                }
+            }
+            if (!changed) return;
+            _changed = false;
+
+            Text.Length = 0;
+            foreach (Line line in Lines)
+            {
+                if (Text.Length > 0) Text.Append('\n');
+                Text.Append("<alpha=#").Append(line.Alpha.ToString("X2")).Append('>').Append(line.Text);
+            }
+            label.text = Text.ToString();
         }
 
         private static TMP_Text Label()
