@@ -20,26 +20,26 @@ namespace FishTracker
                 ObjectDB.instance == null)
                 return;
 
+            // Runs every frame while the inventory is open: find out first whether there is anything to add.
             string name = item.m_shared.m_name;
-            var text = new StringBuilder(__result);
-
             FishInfo fish = FishData.ByItemName(name);
             if (fish != null)
             {
+                var fishText = new StringBuilder(__result);
                 if (!FishData.IsCaught(fish))
-                    text.Append($"\n\n<color={HintColor}>You haven't caught this fish yet.</color>");
+                    fishText.Append($"\n\n<color={HintColor}>You haven't caught this fish yet.</color>");
                 if (FishData.Fisherman != null)
-                    text.Append($"\n<color={ProgressColor}>{Localization.instance.Localize(FishData.Fisherman.m_name)}: " +
-                                $"{FishData.CaughtCount()} / {FishData.TotalCount()}</color>");
-                __result = text.ToString();
+                    fishText.Append($"\n<color={ProgressColor}>{Localization.instance.Localize(FishData.Fisherman.m_name)}: " +
+                                    $"{FishData.CaughtCount()} / {FishData.TotalCount()}</color>");
+                __result = fishText.ToString();
                 return;
             }
 
-            string bait = Chum.BaitOf(name) ?? name;
-            List<FishInfo> biters = FishData.All.FindAll(f => f.Baits.ContainsKey(bait));
+            List<FishInfo> biters = FishData.BitersOf(Chum.BaitOf(name) ?? name);
             if (biters.Count == 0)
                 return;
 
+            var text = new StringBuilder(__result);
             text.Append("\n\nFish that bite:");
             Player player = Player.m_localPlayer;
             foreach (FishInfo biter in biters)

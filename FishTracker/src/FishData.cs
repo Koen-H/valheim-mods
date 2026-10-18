@@ -21,8 +21,14 @@ namespace FishTracker
     {
         internal const string FishermanId = "GrindFish";
 
+        private static readonly List<FishInfo> NoFish = new List<FishInfo>();
+
         private static List<FishInfo> s_fish;
+        // Lookups for the tooltips, which run every frame while the inventory is open.
+        private static readonly Dictionary<string, FishInfo> s_byItem = new Dictionary<string, FishInfo>();
+        private static readonly Dictionary<string, List<FishInfo>> s_byBait = new Dictionary<string, List<FishInfo>>();
         private static bool s_biomesLoaded;
+        private static float s_nextBiomeTry;
         private static Achievement s_fisherman;
 
         internal static Achievement Fisherman => s_fisherman != null ? s_fisherman : s_fisherman = AchievementStats.Find(FishermanId);
@@ -33,8 +39,12 @@ namespace FishTracker
             {
                 if (s_fish == null || s_fish.Count == 0)
                     Build();
-                if (!s_biomesLoaded)
+                // The spawners only exist once a world is loaded; look again every few seconds until then.
+                if (!s_biomesLoaded && Time.time >= s_nextBiomeTry)
+                {
+                    s_nextBiomeTry = Time.time + 5f;
                     LoadBiomes();
+                }
                 return s_fish;
             }
         }
@@ -42,7 +52,21 @@ namespace FishTracker
         internal static bool IsCaught(FishInfo fish) =>
             AchievementStats.Has(AchievementStats.StatsFor(Fisherman)?.m_pickableStats, fish.Fish.m_name);
 
-        internal static FishInfo ByItemName(string itemName) => All.Find(f => f.ItemName == itemName);
+        internal static FishInfo ByItemName(string itemName)
+        {
+            if (All.Count == 0)
+                return null;
+            s_byItem.TryGetValue(itemName, out FishInfo fish);
+            return fish;
+        }
+
+        /// <summary>The fish that take this bait (an item name); empty for anything else.</summary>
+        internal static List<FishInfo> BitersOf(string baitName)
+        {
+            if (All.Count == 0)
+                return NoFish;
+            return s_byBait.TryGetValue(baitName, out List<FishInfo> fish) ? fish : NoFish;
+        }
 
         internal static int CaughtCount()
         {
@@ -55,6 +79,8 @@ namespace FishTracker
         private static void Build()
         {
             s_fish = new List<FishInfo>();
+            s_byItem.Clear();
+            s_byBait.Clear();
             if (ObjectDB.instance == null)
                 return;
 
@@ -72,6 +98,13 @@ namespace FishTracker
                         info.Baits[bait.m_bait.m_itemData.m_shared.m_name] = bait.m_chance;
                 }
                 s_fish.Add(info);
+                s_byItem[info.ItemName] = info;
+                foreach (string bait in info.Baits.Keys)
+                {
+                    if (!s_byBait.TryGetValue(bait, out List<FishInfo> biters))
+                        s_byBait[bait] = biters = new List<FishInfo>();
+                    biters.Add(info);
+                }
             }
             s_biomesLoaded = false;
         }
