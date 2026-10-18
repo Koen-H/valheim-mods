@@ -257,17 +257,17 @@ SEED = f"""
   </g>
 """
 
-# A compass rose with its four points.
-COMPASS = f"""
-  <circle cx="128" cy="140" r="90" fill="url(#glow)"/>
+# A snowy mountain with a banner on the top: build high.
+PEAK = f"""
+  <circle cx="128" cy="120" r="90" fill="url(#glow)"/>
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="M24 214 L104 92 L132 132 L156 104 L232 214 Z" fill="url(#stone)" stroke="#2b2722" stroke-width="4"/>
+    <path d="M104 92 L124 122 L112 116 L100 128 L88 116 Z" fill="{PARCHMENT}"/>
+    <path d="M156 104 L172 128 L162 124 L152 132 L144 122 Z" fill="{PARCHMENT}"/>
+  </g>
   <g filter="url(#shadow)">
-    <circle cx="128" cy="140" r="78" fill="#1a1612" stroke="url(#gold)" stroke-width="6"/>
-    <path d="M128 70 L142 140 L128 210 L114 140 Z" fill="url(#gold)" stroke="#5a3a10" stroke-width="3"
-          stroke-linejoin="round"/>
-    <path d="M58 140 L128 126 L198 140 L128 154 Z" fill="{PARCHMENT}" stroke="#5a3a10" stroke-width="3"
-          stroke-linejoin="round"/>
-    <path d="M128 70 L142 140 L114 140 Z" fill="#ff9e1a"/>
-    <circle cx="128" cy="140" r="8" fill="#1a1612" stroke="url(#gold)" stroke-width="3"/>
+    <path d="M104 92 L104 34" stroke="#3b2614" stroke-width="6" stroke-linecap="round"/>
+    <path d="M106 36 L150 46 L106 58 Z" fill="#ff9e1a" stroke="#1a1410" stroke-width="3" stroke-linejoin="round"/>
   </g>
 """
 
@@ -338,7 +338,7 @@ BARS = f"""
   </g>
 """
 
-ICONS = {"MaterialTracker": BARS, "BestiaryTracker": BEAST, "ComfortHelper": COMFORT, "ExploreHelper": COMPASS, "FishTracker": FISH, "FoodTracker": FOOD, "MerchantTracker": COINS, "ModdedAchievements": CUP, "WorldSeed": SEED, "AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
+ICONS = {"PeakFinder": PEAK, "MaterialTracker": BARS, "BestiaryTracker": BEAST, "ComfortHelper": COMFORT, "FishTracker": FISH, "FoodTracker": FOOD, "MerchantTracker": COINS, "ModdedAchievements": CUP, "WorldSeed": SEED, "AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():

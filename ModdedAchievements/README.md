@@ -14,5 +14,5 @@ Pairs well with the other achievement helpers:
 [FoodTracker](https://thunderstore.io/c/valheim/p/koendertjh/FoodTracker/),
 [FishTracker](https://thunderstore.io/c/valheim/p/koendertjh/FishTracker/),
 [BestiaryTracker](https://thunderstore.io/c/valheim/p/koendertjh/BestiaryTracker/),
-[ExploreHelper](https://thunderstore.io/c/valheim/p/koendertjh/ExploreHelper/) and
+[PeakFinder](https://thunderstore.io/c/valheim/p/koendertjh/PeakFinder/) and
 [ComfortHelper](https://thunderstore.io/c/valheim/p/koendertjh/ComfortHelper/).

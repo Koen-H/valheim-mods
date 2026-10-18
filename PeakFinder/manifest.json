@@ -1,0 +1,9 @@
+{
+  "name": "PeakFinder",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Shows the highest peaks of your world on the map, and how much you still need to build on top for Top of the World.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
