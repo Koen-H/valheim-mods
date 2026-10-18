@@ -1,0 +1,9 @@
+{
+  "name": "ModdedAchievements",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Earn achievements in a modded game. Only the 'modded' flag is ignored: dev commands, cheated world settings and cheated items still block them.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}

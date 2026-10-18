@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared settings, common references and the deploy step are in ..\Directory.Build.props and .targets.
+       The version comes from manifest.json. -->
+  <PropertyGroup>
+    <AssemblyName>ModdedAchievements</AssemblyName>
+    <RootNamespace>ModdedAchievements</RootNamespace>
+  </PropertyGroup>
+
+</Project>

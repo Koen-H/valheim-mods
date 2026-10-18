@@ -19,8 +19,8 @@ every part you haven't done shows as **??? / ???**. This mod shows you, with as 
 ## Achievements in a modded game
 
 Valheim turns achievements off when a mod marks the game as modded (Jotunn and several other mods do).
-If you want to earn achievements in a modded game, you need a mod that turns them back on, such as
-[AchievementEnabler](https://thunderstore.io/c/valheim/p/MidnightMods/AchievementEnabler/). AchievementPeek
+If you want to earn achievements in a modded game, install
+[ModdedAchievements](https://thunderstore.io/c/valheim/p/koendertjh/ModdedAchievements/) to turn them back on. AchievementPeek
 itself doesn't mark the game as modded.
 
 ## Config (`com.koendertjh.achievementpeek.cfg`)
