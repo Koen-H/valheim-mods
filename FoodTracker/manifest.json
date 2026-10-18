@@ -1,0 +1,9 @@
+{
+  "name": "FoodTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Marks every food you have never eaten or cooked, for The Gourmet and The Master Chef achievements. I wonder what it tastes like...",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
