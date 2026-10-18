@@ -1,9 +1,12 @@
 // Finds the highest peaks of the world from the world generator, the same heights the terrain is built from.
-// A coarse 64 m grid over the whole world (spread over many frames), local tops of that grid, then a fine
-// search around the best ones. The result is kept for the world (seed) it was made for.
+// A coarse 64 m grid over the whole world, local tops of that grid, then a fine search around the best ones.
+// All of it is spread over frames with a time budget, so the game keeps running smoothly. The coroutine runs on
+// the plugin object, which lives as long as the game, so logging out mid-scan doesn't leave it stuck.
+// The result is kept for the world (seed) it was made for.
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace PeakFinder
@@ -18,7 +21,8 @@ namespace PeakFinder
     {
         private const float WorldRadius = 10000f;
         private const float Step = 64f;
-        private const int SamplesPerFrame = 4000;
+        // Height samples cost a few microseconds each; stop for the frame after this many milliseconds.
+        private const double BudgetMs = 2.0;
         // More candidates than ever shown, so OnlyExplored still has enough to pick from.
         private const int Candidates = 200;
 
@@ -33,12 +37,12 @@ namespace PeakFinder
 
         private static int Seed => WorldGenerator.instance?.m_world?.m_seed ?? 0;
 
-        internal static void EnsureScan(MonoBehaviour host)
+        internal static void EnsureScan()
         {
-            if (Ready || s_scanning || WorldGenerator.instance == null)
+            if (Ready || s_scanning || WorldGenerator.instance == null || PeakFinderPlugin.Instance == null)
                 return;
             s_scanning = true;
-            host.StartCoroutine(Scan());
+            PeakFinderPlugin.Instance.StartCoroutine(Scan());
         }
 
         private static IEnumerator Scan()
@@ -47,7 +51,7 @@ namespace PeakFinder
             int seed = Seed;
             int size = Mathf.CeilToInt(WorldRadius * 2f / Step) + 1;
             var heights = new float[size, size];
-            int done = 0;
+            Stopwatch frame = Stopwatch.StartNew();
 
             for (int i = 0; i < size; i++)
             {
@@ -56,15 +60,16 @@ namespace PeakFinder
                     float x = -WorldRadius + i * Step;
                     float z = -WorldRadius + j * Step;
                     heights[i, j] = x * x + z * z > WorldRadius * WorldRadius ? float.MinValue : generator.GetHeight(x, z);
-                    if (++done % SamplesPerFrame == 0)
+                }
+                if (frame.Elapsed.TotalMilliseconds > BudgetMs)
+                {
+                    yield return null;
+                    if (WorldGenerator.instance != generator)
                     {
-                        yield return null;
-                        if (WorldGenerator.instance != generator)
-                        {
-                            s_scanning = false;
-                            yield break;
-                        }
+                        s_scanning = false;
+                        yield break;
                     }
+                    frame.Restart();
                 }
             }
 
@@ -95,16 +100,29 @@ namespace PeakFinder
             }
             tops.Sort((a, b) => b.Height.CompareTo(a.Height));
 
+            // Refining moves a top by at most one grid step, so a top that close to a found peak can be skipped
+            // before paying for the fine search.
+            float minDistance = PeakFinderPlugin.MinDistance.Value;
             var peaks = new List<Peak>();
             foreach (Peak top in tops)
             {
                 if (peaks.Count >= Candidates)
                     break;
+                if (TooClose(peaks, top.Position, minDistance - Step))
+                    continue;
                 Peak refined = Refine(generator, top.Position);
-                if (!peaks.Exists(p => Flat(p.Position - refined.Position) < PeakFinderPlugin.MinDistance.Value))
+                if (!TooClose(peaks, refined.Position, minDistance))
                     peaks.Add(refined);
-                if (peaks.Count % 20 == 0)
+                if (frame.Elapsed.TotalMilliseconds > BudgetMs)
+                {
                     yield return null;
+                    if (WorldGenerator.instance != generator)
+                    {
+                        s_scanning = false;
+                        yield break;
+                    }
+                    frame.Restart();
+                }
             }
             peaks.Sort((a, b) => b.Height.CompareTo(a.Height));
 
@@ -114,6 +132,16 @@ namespace PeakFinder
             PeakFinderPlugin.Log.LogInfo(peaks.Count > 0
                 ? $"Found {peaks.Count} peaks; the highest is {peaks[0].Height:0} m."
                 : "Found no peaks.");
+        }
+
+        private static bool TooClose(List<Peak> peaks, Vector3 position, float distance)
+        {
+            foreach (Peak peak in peaks)
+            {
+                if (Flat(peak.Position - position) < distance)
+                    return true;
+            }
+            return false;
         }
 
         // The highest point within one grid step: 8 m steps, then 1 m steps.

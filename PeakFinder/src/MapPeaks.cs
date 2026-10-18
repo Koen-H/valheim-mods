@@ -26,6 +26,9 @@ namespace PeakFinder
         private static readonly List<Minimap.PinData> s_pins = new List<Minimap.PinData>();
         private static string s_shown = "";
         private static float s_nextCheck;
+        // The toggle of the current map; the setting's change handler is added once and follows it.
+        private static Toggle s_toggle;
+        private static bool s_subscribed;
 
         // ---- toggle ----
 
@@ -66,12 +69,17 @@ namespace PeakFinder
                 foreach (UITooltip tooltip in copy.GetComponentsInChildren<UITooltip>(true))
                     tooltip.Set(Label, "Pins on the highest peaks, for Top of the World (build at 432 m)");
 
-                PeakFinderPlugin.ShowPeaks.SettingChanged += (_, __) =>
+                s_toggle = toggle;
+                if (!s_subscribed)
                 {
-                    if (toggle != null && toggle.isOn != PeakFinderPlugin.ShowPeaks.Value)
-                        toggle.isOn = PeakFinderPlugin.ShowPeaks.Value;
-                    s_nextCheck = 0f;
-                };
+                    s_subscribed = true;
+                    PeakFinderPlugin.ShowPeaks.SettingChanged += (_, __) =>
+                    {
+                        if (s_toggle != null && s_toggle.isOn != PeakFinderPlugin.ShowPeaks.Value)
+                            s_toggle.isOn = PeakFinderPlugin.ShowPeaks.Value;
+                        s_nextCheck = 0f;
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -94,7 +102,7 @@ namespace PeakFinder
             List<Peak> chosen = new List<Peak>();
             if (PeakFinderPlugin.ShowPeaks.Value)
             {
-                Peaks.EnsureScan(__instance);
+                Peaks.EnsureScan();
                 foreach (Peak peak in Peaks.All)
                 {
                     if (chosen.Count >= PeakFinderPlugin.PeakCount.Value)

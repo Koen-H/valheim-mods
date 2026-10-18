@@ -25,6 +25,7 @@ namespace PeakFinder
         internal const float MightyHalls = 49f;
 
         internal static ManualLogSource Log;
+        internal static PeakFinderPlugin Instance;
 
         internal static ConfigEntry<bool> ShowPeaks;
         internal static ConfigEntry<int> PeakCount;
@@ -37,6 +38,7 @@ namespace PeakFinder
         private void Awake()
         {
             Log = Logger;
+            Instance = this;
 
             ShowPeaks = Config.Bind("1 - Map", "ShowPeaks", false,
                 "Show the highest peaks on the map. Also switched with the toggle on the big map.");
