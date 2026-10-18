@@ -32,34 +32,38 @@ namespace ComfortHelper
         private static List<Piece> s_comfortPrefabs;
         private static ZNetScene s_scene;
 
+        // ComfortGroup names, so grouping doesn't turn the enum into a new string for every piece.
+        private static readonly string[] GroupNames = System.Enum.GetNames(typeof(Piece.ComfortGroup));
+
         /// <summary>Pieces of one group don't stack; pieces without a group count once per kind.</summary>
         internal static string GroupOf(Piece piece) =>
-            piece.m_comfortGroup != Piece.ComfortGroup.None ? piece.m_comfortGroup.ToString() : piece.m_name;
+            piece.m_comfortGroup != Piece.ComfortGroup.None ? GroupNames[(int)piece.m_comfortGroup] : piece.m_name;
 
         /// <summary>The piece that counts for each group within 10 m, as the game counts it.</summary>
         internal static Dictionary<string, Piece> BestNearby(Vector3 position)
         {
             var best = new Dictionary<string, Piece>();
+            Nearby(position, best, null);
+            return best;
+        }
+
+        /// <summary>
+        /// One look around: the piece that counts for each group within 10 m, and the names of all comfort pieces
+        /// there (counting or not). Either collection may be null.
+        /// </summary>
+        internal static void Nearby(Vector3 position, Dictionary<string, Piece> best, HashSet<string> names)
+        {
             s_nearby.Clear();
             Piece.GetAllComfortPiecesInRadius(position, Radius, s_nearby);
             foreach (Piece piece in s_nearby)
             {
+                names?.Add(piece.m_name);
+                if (best == null)
+                    continue;
                 string group = GroupOf(piece);
                 if (!best.TryGetValue(group, out Piece current) || piece.GetComfort() > current.GetComfort())
                     best[group] = piece;
             }
-            return best;
-        }
-
-        /// <summary>Names of the comfort pieces within 10 m, counting or not.</summary>
-        internal static HashSet<string> NamesNearby(Vector3 position)
-        {
-            var names = new HashSet<string>();
-            s_nearby.Clear();
-            Piece.GetAllComfortPiecesInRadius(position, Radius, s_nearby);
-            foreach (Piece piece in s_nearby)
-                names.Add(piece.m_name);
-            return names;
         }
 
         internal static ComfortReport Build(Player player)

@@ -104,7 +104,12 @@ namespace ComfortHelper
     {
         private static Dictionary<string, Piece> s_best = new Dictionary<string, Piece>();
         private static HashSet<string> s_names = new HashSet<string>();
+        private static Dictionary<string, Piece> s_nextBest = new Dictionary<string, Piece>();
+        private static HashSet<string> s_nextNames = new HashSet<string>();
         private static float s_nextUpdate;
+
+        /// <summary>Goes up whenever what's nearby changes; caches built from this state compare against it.</summary>
+        internal static int Version { get; private set; }
 
         /// <summary>True when what's nearby changed since the last update.</summary>
         internal static bool Update(Player player, bool force = false)
@@ -113,13 +118,28 @@ namespace ComfortHelper
                 return false;
             s_nextUpdate = Time.time + 1f;
 
-            Dictionary<string, Piece> best = Comfort.BestNearby(player.transform.position);
-            HashSet<string> names = Comfort.NamesNearby(player.transform.position);
-            bool changed = !names.SetEquals(s_names) ||
-                           !best.Values.Select(p => p.m_name).OrderBy(n => n).SequenceEqual(s_best.Values.Select(p => p.m_name).OrderBy(n => n));
-            s_best = best;
-            s_names = names;
+            // Fill the spare collections, compare, then swap: no new collections every second.
+            s_nextBest.Clear();
+            s_nextNames.Clear();
+            Comfort.Nearby(player.transform.position, s_nextBest, s_nextNames);
+            bool changed = !s_nextNames.SetEquals(s_names) || !SameCounting(s_nextBest, s_best);
+            (s_best, s_nextBest) = (s_nextBest, s_best);
+            (s_names, s_nextNames) = (s_nextNames, s_names);
+            if (changed)
+                Version++;
             return changed;
+        }
+
+        private static bool SameCounting(Dictionary<string, Piece> a, Dictionary<string, Piece> b)
+        {
+            if (a.Count != b.Count)
+                return false;
+            foreach (KeyValuePair<string, Piece> pair in a)
+            {
+                if (!b.TryGetValue(pair.Key, out Piece other) || other.m_name != pair.Value.m_name)
+                    return false;
+            }
+            return true;
         }
 
         internal static bool IsHere(Piece piece) => s_names.Contains(piece.m_name);
@@ -304,7 +324,24 @@ namespace ComfortHelper
             if (!ComfortHelperPlugin.HoverInfo.Value || piece == null || piece.m_comfort <= 0 || player == null)
                 return;
 
+            // Runs every frame in build mode: the text is built once per piece and nearby state.
             NearbyState.Update(player);
+            if (s_hoverVersion != NearbyState.Version)
+            {
+                s_hoverTexts.Clear();
+                s_hoverVersion = NearbyState.Version;
+            }
+            if (!s_hoverTexts.TryGetValue(piece.m_name, out string text))
+                s_hoverTexts[piece.m_name] = text = HoverText(piece);
+            __instance.m_pieceDescription.text += text;
+        }
+
+        // Piece name -> its comfort lines, for the current nearby state.
+        private static readonly Dictionary<string, string> s_hoverTexts = new Dictionary<string, string>();
+        private static int s_hoverVersion = -1;
+
+        private static string HoverText(Piece piece)
+        {
             Localization loc = Localization.instance;
             string text = $"\n\n<color=#ffb347>Comfort +{piece.m_comfort}</color> ";
             text += piece.m_comfortGroup == Piece.ComfortGroup.None
@@ -320,7 +357,7 @@ namespace ComfortHelper
                 text += $"\n{loc.Localize(counting.m_name)} counts here now: <color=#7CFC7C>+{piece.m_comfort - counting.GetComfort()} more</color> with this one.";
             else
                 text += $"\n{loc.Localize(counting.m_name)} already counts here; this one adds nothing.";
-            __instance.m_pieceDescription.text += text;
+            return text;
         }
     }
 }
