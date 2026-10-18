@@ -392,17 +392,21 @@ namespace TrophyAssister
             tooltip.m_text = tracked ? UntrackTip : TrackTip;
         }
 
-        // A wishbone (y = 0 is the bottom): two arms curving out and down from a rounded top, with small feet.
+        // A wishbone traced from the game's item icon (y = 0 is the bottom): the stem with its knob points to the
+        // top right; from the joint below it, one arm runs long to the left and the other curves down.
         private static Sprite Icon()
         {
             if (_sprite != null) return _sprite;
-            Vector2[] left = Curve(new Vector2(64f, 100f), new Vector2(28f, 78f), new Vector2(30f, 18f));
-            Vector2[] right = Curve(new Vector2(64f, 100f), new Vector2(100f, 78f), new Vector2(98f, 18f));
+            var joint = new Vector2(100f, 86f);
+            Vector2[] left = Curve(joint, new Vector2(54f, 77f), new Vector2(14f, 63f));
+            Vector2[] down = Curve(joint, new Vector2(99f, 30f), new Vector2(58f, 15f));
+            Vector2[] stem = Curve(joint, new Vector2(108f, 101f), new Vector2(115f, 115f));
             return _sprite = ShapeIcon.Create("TrophyAssister_Wishbone", (x, y) =>
-                ShapeIcon.Ellipse(x, y, 64f, 106f, 15f, 12f) ||
-                ShapeIcon.Ellipse(x, y, 28f, 15f, 12f, 8f) ||
-                ShapeIcon.Ellipse(x, y, 100f, 15f, 12f, 8f) ||
-                OnArm(left, x, y) || OnArm(right, x, y));
+                OnBone(left, 7f, 5.5f, x, y) || OnBone(down, 7f, 5.5f, x, y) || OnBone(stem, 8f, 8f, x, y) ||
+                ShapeIcon.Ellipse(x, y, joint.x, joint.y, 9f, 9f) ||
+                ShapeIcon.Ellipse(x, y, 13f, 63f, 7f, 7f) ||
+                ShapeIcon.Ellipse(x, y, 57f, 19f, 7f, 7f) ||
+                ShapeIcon.Ellipse(x, y, 115f, 116f, 8f, 9f));
         }
 
         // Points along a quadratic curve from a to c, bent towards b.
@@ -417,15 +421,15 @@ namespace TrophyAssister
             return points;
         }
 
-        // Within the arm's thickness: 8 px from its centre line at the top, tapering to 5 px at the foot.
-        private static bool OnArm(Vector2[] arm, float x, float y)
+        // Within the bone's thickness: `start` px from its centre line at the joint, tapering to `end` px.
+        private static bool OnBone(Vector2[] bone, float start, float end, float x, float y)
         {
             var p = new Vector2(x, y);
-            for (int i = 0; i < arm.Length - 1; i++)
+            for (int i = 0; i < bone.Length - 1; i++)
             {
-                Vector2 a = arm[i], ab = arm[i + 1] - a;
+                Vector2 a = bone[i], ab = bone[i + 1] - a;
                 float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
-                float width = Mathf.Lerp(8f, 5f, (i + t) / (arm.Length - 1));
+                float width = Mathf.Lerp(start, end, (i + t) / (bone.Length - 1));
                 if ((p - (a + ab * t)).sqrMagnitude <= width * width) return true;
             }
             return false;
