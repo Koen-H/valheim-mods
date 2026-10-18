@@ -321,7 +321,24 @@ CUP = f"""
   </g>
 """
 
-ICONS = {"BestiaryTracker": BEAST, "ComfortHelper": COMFORT, "ExploreHelper": COMPASS, "FishTracker": FISH, "FoodTracker": FOOD, "MerchantTracker": COINS, "ModdedAchievements": CUP, "WorldSeed": SEED, "AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
+# Metal bars, one still a dashed outline: materials you haven't found yet.
+BARS = f"""
+  <circle cx="128" cy="150" r="88" fill="url(#glow)"/>
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="M40 196 L64 160 L132 160 L108 196 Z" fill="#c07a3a" stroke="#3a2010" stroke-width="4"/>
+    <path d="M108 196 L132 160 L132 176 L108 212 Z" fill="#8a5226" stroke="#3a2010" stroke-width="4"/>
+    <path d="M40 196 L108 196 L108 212 L40 212 Z" fill="#a8652e" stroke="#3a2010" stroke-width="4"/>
+    <path d="M70 150 L94 114 L162 114 L138 150 Z" fill="url(#iron)" stroke="#23262a" stroke-width="4"/>
+    <path d="M138 150 L162 114 L162 130 L138 166 Z" fill="#4a4e53" stroke="#23262a" stroke-width="4"/>
+    <path d="M70 150 L138 150 L138 166 L70 166 Z" fill="#7d8288" stroke="#23262a" stroke-width="4"/>
+  </g>
+  <g fill="none" stroke="{PARCHMENT}" stroke-width="5" stroke-dasharray="10 8" stroke-linejoin="round" opacity="0.85">
+    <path d="M130 100 L154 64 L222 64 L198 100 Z"/>
+    <path d="M198 100 L222 64 L222 80 L198 116 L130 116 L130 100"/>
+  </g>
+"""
+
+ICONS = {"MaterialTracker": BARS, "BestiaryTracker": BEAST, "ComfortHelper": COMFORT, "ExploreHelper": COMPASS, "FishTracker": FISH, "FoodTracker": FOOD, "MerchantTracker": COINS, "ModdedAchievements": CUP, "WorldSeed": SEED, "AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():
