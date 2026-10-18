@@ -17,7 +17,8 @@ namespace ExploreHelper
     internal static class Directions
     {
         private const float Edge = 10350f;
-        private const float PinDistance = Edge + 75f;
+        // Between the line and 10420 m, where the edge of the world starts pushing you (and boats) back.
+        private const float PinDistance = 10385f;
 
         internal static readonly Direction[] All =
         {

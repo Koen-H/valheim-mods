@@ -3,8 +3,11 @@
 *The Explorer* asks you to travel far in all four directions, *The Pathfinder* the same in a world without a
 map. But how far is far, and where exactly? ExploreHelper shows you.
 
-- **Four pins on the map** where each direction counts: more than 10,350 m from the centre of the world, close
-  to the edge. A pin is crossed off once you have that direction.
+- **Four pins on the map** where each direction counts. A direction counts anywhere past a straight line
+  10,350 m from the centre of the world: north is everywhere above that line, and so on. Because the world is
+  round, that is a thin sliver at the very edge, about 3.5 km wide and at most 150 m deep, and from 10,420 m
+  the edge of the world pushes you back. The pins sit in the middle of each sliver. A pin is crossed off once
+  you have that direction.
 - **A message** when you reach a new direction: *You reached the far north! (The Explorer: 2 / 4)*. This also
   works for The Pathfinder, where you have no map.
 - **Mind the compass.** The game counts "far east" on the **left** side of the map and "far west" on the
