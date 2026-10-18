@@ -1,0 +1,9 @@
+{
+  "name": "MerchantTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Marks the wares of Haldor, Hildir and the Bog Witch you have never owned, and counts the wares they will only sell later.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
