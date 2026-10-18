@@ -12,15 +12,26 @@ namespace BestiaryTracker
     [HarmonyPatch]
     internal static class Patches
     {
-        // Dictionary<Character, HudData>; HudData is private.
+        // Dictionary<Character, HudData>; HudData is private. ShowHud runs every frame for every creature in
+        // range, so the dictionary is fetched once per EnemyHud instead of by reflection on every call.
         private static readonly FieldInfo HudsField = AccessTools.Field(typeof(EnemyHud), "m_huds");
+        private static EnemyHud s_hudOwner;
+        private static IDictionary s_huds;
 
-        private static IDictionary Huds(EnemyHud hud) => (IDictionary)HudsField.GetValue(hud);
+        private static IDictionary Huds(EnemyHud hud)
+        {
+            if (hud != s_hudOwner)
+            {
+                s_hudOwner = hud;
+                s_huds = (IDictionary)HudsField.GetValue(hud);
+            }
+            return s_huds;
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(EnemyHud), "ShowHud")]
         private static void BeforeShowHud(EnemyHud __instance, Character c, out bool __state) =>
-            __state = c != null && !Huds(__instance).Contains(c);
+            __state = BestiaryTrackerPlugin.NameMarker.Value && c != null && !Huds(__instance).Contains(c);
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyHud), "ShowHud")]

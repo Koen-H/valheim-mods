@@ -11,6 +11,7 @@ namespace WorldSeed
     internal static class MapLabel
     {
         private static TMP_Text s_label;
+        private static float s_nextRefresh;
 
         [HarmonyPostfix]
         [HarmonyPatch("Start")]
@@ -36,12 +37,22 @@ namespace WorldSeed
             s_label.text = "";
         }
 
+        // Minimap.Update runs every frame; the text only needs a look now and then, and only while it can be seen.
         [HarmonyPostfix]
         [HarmonyPatch("Update")]
         private static void Refresh()
         {
             if (s_label == null)
                 return;
+            if (!s_label.isActiveAndEnabled)
+            {
+                // Map closed: refresh right away the next time it opens.
+                s_nextRefresh = 0f;
+                return;
+            }
+            if (Time.time < s_nextRefresh)
+                return;
+            s_nextRefresh = Time.time + 1f;
 
             string text = "";
             if (WorldSeedPlugin.ShowOnMap.Value && WorldSeedPlugin.Seed != null)
