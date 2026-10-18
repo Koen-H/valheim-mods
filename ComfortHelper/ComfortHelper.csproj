@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Shared settings, common references and the deploy step are in ..\Directory.Build.props and .targets.
+       The version comes from manifest.json. -->
+  <PropertyGroup>
+    <AssemblyName>ComfortHelper</AssemblyName>
+    <RootNamespace>ComfortHelper</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\AchievementStats.cs" Link="Shared\AchievementStats.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(ManagedDir)\assembly_guiutils.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\assembly_utils.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

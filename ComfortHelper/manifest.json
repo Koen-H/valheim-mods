@@ -1,0 +1,9 @@
+{
+  "name": "ComfortHelper",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Tells you which furniture would raise your comfort, and how close you are to the comfort level 20 of the Comfort is King achievement.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
