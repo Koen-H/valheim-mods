@@ -1,6 +1,6 @@
 {
   "name": "TrophyAssister",
-  "version_number": "1.2.0",
+  "version_number": "1.2.1",
   "website_url": "https://github.com/Koen-H/valheim-mods",
   "description": "Trophy pity system: every kill without a trophy raises the next drop chance. Shows chances and dry kills in the Trophies tab, with spoiler-free missing trophies. Track a trophy and the wishbone finds its creatures. No server install needed.",
   "dependencies": [

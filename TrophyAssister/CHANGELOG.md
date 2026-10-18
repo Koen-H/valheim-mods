@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- The track button's wishbone icon now has the same shape and angle as the game's wishbone item.
+
 ## 1.2.0
 
 - Trophy tracker: each trophy in the Trophies tab has a small wishbone icon. Click it to track that trophy
