@@ -35,9 +35,22 @@ Open your inventory → **Trophies**:
   (unfinished game content without a name in the game's text files).
 - Chances are for a normal (0-star) creature and update every time you reopen the tab.
 
+## Wishbone tracker
+Each trophy in the Trophies tab (collected, or missing but already discovered) has a small
+**wishbone** on its icon. Click it to track that trophy; it turns red. Click again to stop.
+You can track several trophies at once.
+
+With the **wishbone** equipped, it then also finds living creatures that drop a tracked trophy,
+the same way it finds buried treasure: the closest one is picked (by default any creature the
+game has loaded around you, which follows the game's simulation distance; set `Range` to limit it),
+and it pings more often the closer you get. These pings are **red** and appear a few meters from you in the creature's direction (the sound
+comes from there too), and the wishbone icon at the
+top right turns red while a tracked creature is in range. Treasure and silver keep pinging as usual.
+Tamed creatures are ignored.
+
 ## Files
 Settings: `BepInEx\config\com.koendertjh.trophyassister.cfg`. Pity counters:
-`BepInEx\config\TrophyAssister_pity.txt`, per character ID (a long number), so renaming a
+`BepInEx\config\TrophyAssister_pity.txt` and tracked trophies: `BepInEx\config\TrophyAssister_tracked.txt`, per character ID (a long number), so renaming a
 character keeps its counters and two characters with the same name don't share them.
 
 ## How the pity works (defaults)
@@ -92,6 +105,8 @@ Type these in chat with a leading `/` (or in the F5 console without it). They're
 | Trophy list | ShowMissing | true | Add uncollected trophies |
 | Trophy list | SpoilerFree | true | Hide never-killed trophies behind "?" |
 | Trophy list | HiddenTrophies | TrophyDeerWhite | Trophies never added as missing |
+| Wishbone tracker | Enabled | true | Small wishbone on each trophy; the wishbone finds creatures of tracked trophies |
+| Wishbone tracker | Range | 0 | How close (m) a tracked creature must be for the wishbone to find it; 0 = any loaded creature (0–500) |
 
 ## Multiplayer
 - No server install: works on vanilla servers.

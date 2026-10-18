@@ -2,6 +2,7 @@
 //  - every trophy shows "Next drop: X%" plus your dry-kill count
 //  - trophies you haven't collected yet are added in their own slot, greyed out
 //  - SpoilerFree: trophies of creatures you've never killed show a '?' and '??????'
+//  - a small wishbone button on each trophy to track it with the wishbone (see TrophyTracker)
 //
 // Vanilla builds the list in InventoryGui.UpdateTrophyList each time the tab opens.
 // We run after it, reuse its own element prefab, and place missing trophies the
@@ -42,7 +43,8 @@ namespace TrophyAssister
 
         private static void Postfix(InventoryGui __instance)
         {
-            if (!TrophyAssisterPlugin.ShowChancesInList.Value && !TrophyAssisterPlugin.ShowMissingTrophies.Value) return;
+            bool track = TrophyAssisterPlugin.TrackerEnabled.Value;
+            if (!TrophyAssisterPlugin.ShowChancesInList.Value && !TrophyAssisterPlugin.ShowMissingTrophies.Value && !track) return;
 
             try
             {
@@ -59,13 +61,15 @@ namespace TrophyAssister
                 var collected = new HashSet<string>(player.GetTrophies());
 
                 // 1. Annotate the vanilla (collected) entries.
-                if (TrophyAssisterPlugin.ShowChancesInList.Value)
+                if (TrophyAssisterPlugin.ShowChancesInList.Value || track)
                 {
                     foreach (var el in elements)
                     {
                         if (el == null) continue;
                         string trophy = TrophyIndex.TrophyForIcon(UiUtil.IconSprite(el.transform));
                         if (trophy == null) continue;
+                        if (track) TrackButton.Add(el.transform, trophy, charKey);
+                        if (!TrophyAssisterPlugin.ShowChancesInList.Value) continue;
                         string line = ChanceLine(trophy, charKey, collected: true);
                         if (line != null) UiUtil.PrependText(el.transform, "description", line);
                     }
@@ -115,6 +119,7 @@ namespace TrophyAssister
                             if (line != null) desc = line + "\n" + desc;
                         }
                         UiUtil.SetText(rt, "description", desc, GreyText);
+                        if (track) TrackButton.Add(rt, t.PrefabName, charKey);
                     }
                     else
                     {

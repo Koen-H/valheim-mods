@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\ShapeIcon.cs" Link="Shared\ShapeIcon.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="$(ManagedDir)\assembly_guiutils.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.ParticleSystemModule.dll" Private="false" />
     <Reference Include="$(ManagedDir)\assembly_utils.dll" Private="false" />
     <Reference Include="$(ManagedDir)\UnityEngine.UI.dll" Private="false" />
     <Reference Include="$(ManagedDir)\UnityEngine.UIModule.dll" Private="false" />
