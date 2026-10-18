@@ -8,6 +8,7 @@ need them, except EssenceForAll, which works best when the whole group has it.
 
 | | Mod | What it does | |
 | --- | --- | --- | --- |
+| <img src="BossReset/icon.png" width="64" alt=""> | **BossReset** | A boss fight gone wrong? `/bossreset` removes the boss and its minions and gives back your summoning items, so you can start over. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BossReset/) · [Details](BossReset/README.md) |
 | <img src="BuildTracker/icon.png" width="64" alt=""> | **BuildTracker** | Adds a **Not built** tab to the build menu with every piece you have never placed, and shows how many pieces you haven't discovered yet. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) · [Details](BuildTracker/README.md) |
 | <img src="CraftTracker/icon.png" width="64" alt=""> | **CraftTracker** | Adds a **Not crafted** tab to crafting stations with every item you have never made. You can craft straight from it. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) · [Details](CraftTracker/README.md) |
 | <img src="EssenceForAll/icon.png" width="64" alt=""> | **EssenceForAll** | Thunderblood and Frostfire essences always drop, with one share for every player that was nearby when the creature spawned. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/EssenceForAll/) · [Details](EssenceForAll/README.md) |

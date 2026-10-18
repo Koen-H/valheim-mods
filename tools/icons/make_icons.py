@@ -152,7 +152,28 @@ SUMMON = f"""
   <ellipse cx="151" cy="108" rx="3.5" ry="4.5" fill="#d8fbff"/>
 """
 
-ICONS = {"BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
+# A horned boss skull inside a circular "start over" arrow: reset the fight.
+BOSS = f"""
+  <circle cx="128" cy="136" r="80" fill="url(#glow)"/>
+  <g filter="url(#shadow)" fill="none" stroke="{PARCHMENT}" stroke-width="10" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M196 92 A82 82 0 1 0 210 148"/>
+    <path d="M168 86 L198 90 L202 60"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M102 120 Q84 104 80 78 Q96 94 112 104 Z" fill="#c9b48a" stroke="#3a2a18" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M154 120 Q172 104 176 78 Q160 94 144 104 Z" fill="#c9b48a" stroke="#3a2a18" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M128 192 Q110 190 108 176 L104 166 Q90 150 96 128 Q104 104 128 102 Q152 104 160 128 Q166 150 152 166
+             L148 176 Q146 190 128 192 Z" fill="#e3d6b8" stroke="#3a2a18" stroke-width="3.5" stroke-linejoin="round"/>
+    <ellipse cx="115" cy="142" rx="10" ry="11" fill="#1c140c"/>
+    <ellipse cx="141" cy="142" rx="10" ry="11" fill="#1c140c"/>
+    <path d="M128 156 L122 168 L134 168 Z" fill="#1c140c"/>
+    <path d="M114 178 L114 188 M122 180 L122 190 M134 180 L134 190 M142 178 L142 188" stroke="#3a2a18" stroke-width="3"
+          stroke-linecap="round"/>
+  </g>
+"""
+
+ICONS = {"BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():
