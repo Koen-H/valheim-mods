@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0
+
+- Trophy tracker: each trophy in the Trophies tab has a small wishbone icon. Click it to track that trophy
+  (it turns red); click again to stop. Tracked trophies are saved per character.
+- While the wishbone is equipped, it also finds living creatures that drop a tracked trophy, the same way
+  it finds buried treasure: it pings more often the closer you get. These pings are red and appear a few meters from you in the creature's direction, and the wishbone
+  icon at the top right turns red while such a creature is within range. Treasure and silver still ping as usual.
+- New settings under `5 - Wishbone tracker`: `Enabled` and `Range` (default 0 = any creature the game has loaded
+  around you, which follows the game's simulation distance).
+
 ## 1.1.1
 
 - Performance: dry kills are saved 30 seconds after a change, on logout and when the game closes, instead of

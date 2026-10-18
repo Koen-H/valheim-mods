@@ -59,6 +59,10 @@ namespace TrophyAssister
         internal static ConfigEntry<bool> SpoilerFree;
         internal static ConfigEntry<string> HiddenTrophies;
 
+        // Wishbone tracker
+        internal static ConfigEntry<bool> TrackerEnabled;
+        internal static ConfigEntry<float> TrackerRange;
+
         private Harmony _harmony;
 
         private void Awake()
@@ -122,7 +126,16 @@ namespace TrophyAssister
                 "Trophy prefab names (comma separated) never added to the list as missing. " +
                 "TrophyDeerWhite is unfinished game content that has no name in the game's text files.");
 
+            TrackerEnabled = Config.Bind("5 - Wishbone tracker", "Enabled", true,
+                "Show a small wishbone on each trophy in the Trophies tab. Click it to track that trophy: while the " +
+                "wishbone is equipped, it also pings (in red) for living creatures that drop a tracked trophy.");
+            TrackerRange = Config.Bind("5 - Wishbone tracker", "Range", 0f,
+                new ConfigDescription("How close (in meters) a creature with a tracked trophy must be for the wishbone to find it. " +
+                    "0 = any creature the game has loaded around you (follows the game's simulation distance setting).",
+                    new AcceptableValueRange<float>(0f, 500f)));
+
             PityStore.Load();
+            TrackedStore.Load();
 
             _harmony = new Harmony(ModGuid);
             Patcher.SafePatch(_harmony, typeof(KillCredit));
@@ -130,6 +143,7 @@ namespace TrophyAssister
             Patcher.SafePatch(_harmony, typeof(TrophyListPatch));
             Patcher.SafePatch(_harmony, typeof(TrophyNet));
             Patcher.SafePatch(_harmony, typeof(SaveOnLogout));
+            Patcher.SafePatch(_harmony, typeof(WishboneIconPatch));
             Commands.Register();
 
             Logger.LogInfo($"{ModName} {ModVersion} loaded (client-side).");
@@ -138,6 +152,7 @@ namespace TrophyAssister
         private void Update()
         {
             PityLabel.Tick();
+            TrophyFinder.Tick();
             PityStore.SaveIfDue();
         }
 
@@ -585,6 +600,7 @@ namespace TrophyAssister
     internal static class Hud
     {
         public static void Center(string text) => Show(MessageHud.MessageType.Center, text);
+        public static void TopLeft(string text) => Show(MessageHud.MessageType.TopLeft, text);
 
         private static void Show(MessageHud.MessageType type, string text)
         {
