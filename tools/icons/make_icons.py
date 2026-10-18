@@ -192,7 +192,136 @@ PEEK = f"""
   </g>
 """
 
-ICONS = {"AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
+# A steaming bowl and the orange "not eaten yet" diamond.
+FOOD = f"""
+  <g fill="none" stroke="{PARCHMENT}" stroke-width="6" stroke-linecap="round" opacity="0.75">
+    <path d="M100 96 Q88 80 100 64 Q112 48 100 32"/>
+    <path d="M128 96 Q116 80 128 64 Q140 48 128 32"/>
+    <path d="M156 96 Q144 80 156 64 Q168 48 156 32"/>
+  </g>
+  <circle cx="128" cy="150" r="80" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <path d="M40 120 L216 120 Q212 200 128 214 Q44 200 40 120 Z" fill="url(#wood)" stroke="#2a1a0c" stroke-width="4"
+          stroke-linejoin="round"/>
+    <ellipse cx="128" cy="120" rx="88" ry="14" fill="#7a3a1a" stroke="#2a1a0c" stroke-width="4"/>
+    <ellipse cx="110" cy="117" rx="20" ry="5" fill="#c2662e"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="178" y="166" width="40" height="40" rx="4" transform="rotate(45 198 186)" fill="#ff9e1a"
+          stroke="#1a1410" stroke-width="4"/>
+  </g>
+"""
+
+# A fish on a hook.
+FISH = f"""
+  <circle cx="120" cy="150" r="84" fill="url(#glow)"/>
+  <g fill="none" stroke="{PARCHMENT}" stroke-width="6" stroke-linecap="round" opacity="0.85">
+    <path d="M176 28 L176 96 Q176 122 152 122 Q132 122 132 104"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M36 158 Q92 96 168 150 L214 118 L206 158 L214 198 L168 166 Q92 220 36 158 Z" fill="#6aa7c8"
+          stroke="#13283a" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M60 158 Q100 136 150 152" fill="none" stroke="#d8eef8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <circle cx="70" cy="152" r="6" fill="#13283a"/>
+  </g>
+"""
+
+# A paw print and claw marks: creatures to slay.
+BEAST = f"""
+  <circle cx="128" cy="140" r="86" fill="url(#glow)"/>
+  <g fill="none" stroke="{PARCHMENT}" stroke-width="8" stroke-linecap="round" opacity="0.8">
+    <path d="M150 40 L206 120"/>
+    <path d="M128 44 L190 136"/>
+    <path d="M106 50 L170 148"/>
+  </g>
+  <g filter="url(#shadow)" fill="url(#iron)" stroke="#23262a" stroke-width="3.5">
+    <ellipse cx="92" cy="172" rx="40" ry="34"/>
+    <ellipse cx="50" cy="126" rx="14" ry="18"/>
+    <ellipse cx="78" cy="102" rx="14" ry="19"/>
+    <ellipse cx="110" cy="102" rx="14" ry="19"/>
+    <ellipse cx="136" cy="128" rx="14" ry="18"/>
+  </g>
+"""
+
+# A seed sprouting under a ring of the world.
+SEED = f"""
+  <circle cx="128" cy="140" r="88" fill="url(#glow)"/>
+  <circle cx="128" cy="140" r="76" fill="none" stroke="{PARCHMENT}" stroke-width="5" stroke-dasharray="14 10"
+          opacity="0.6"/>
+  <g filter="url(#shadow)">
+    <path d="M128 150 Q128 104 128 82" stroke="#5f9a3a" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M128 106 Q96 70 70 84 Q92 116 128 106 Z" fill="#7dbb4a" stroke="#203a12" stroke-width="3"/>
+    <path d="M128 92 Q160 56 188 70 Q164 102 128 92 Z" fill="#8fcb58" stroke="#203a12" stroke-width="3"/>
+    <ellipse cx="128" cy="176" rx="36" ry="30" fill="url(#wood)" stroke="#2a1a0c" stroke-width="4"/>
+    <path d="M110 166 Q128 154 146 166" stroke="#c99a5e" stroke-width="3" fill="none" opacity="0.7"/>
+  </g>
+"""
+
+# A compass rose with its four points.
+COMPASS = f"""
+  <circle cx="128" cy="140" r="90" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <circle cx="128" cy="140" r="78" fill="#1a1612" stroke="url(#gold)" stroke-width="6"/>
+    <path d="M128 70 L142 140 L128 210 L114 140 Z" fill="url(#gold)" stroke="#5a3a10" stroke-width="3"
+          stroke-linejoin="round"/>
+    <path d="M58 140 L128 126 L198 140 L128 154 Z" fill="{PARCHMENT}" stroke="#5a3a10" stroke-width="3"
+          stroke-linejoin="round"/>
+    <path d="M128 70 L142 140 L114 140 Z" fill="#ff9e1a"/>
+    <circle cx="128" cy="140" r="8" fill="#1a1612" stroke="url(#gold)" stroke-width="3"/>
+  </g>
+"""
+
+# A chair by the fire.
+COMFORT = f"""
+  <circle cx="170" cy="170" r="70" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <path d="M48 52 L48 214 M48 140 L118 140 L118 214 M48 52 L92 52 L92 140" fill="none" stroke="url(#wood)"
+          stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="40" y="128" width="90" height="16" rx="5" fill="url(#wood)" stroke="#2a1a0c" stroke-width="3"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M146 214 L206 214" stroke="#3b2614" stroke-width="10" stroke-linecap="round"/>
+    <path d="M176 206 Q140 176 166 140 Q170 162 182 166 Q178 140 194 120 Q196 150 210 170 Q214 196 176 206 Z"
+          fill="#ff9e1a" stroke="#7a2a0a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M178 202 Q162 186 176 168 Q182 184 192 188 Q194 198 178 202 Z" fill="#ffe7a8"/>
+  </g>
+"""
+
+# A stack of coins and a "new" star.
+COINS = f"""
+  <circle cx="120" cy="160" r="84" fill="url(#glow)"/>
+  <g filter="url(#shadow)" stroke="#5a3a10" stroke-width="3.5">
+    <ellipse cx="110" cy="200" rx="58" ry="16" fill="url(#gold)"/>
+    <rect x="52" y="168" width="116" height="32" fill="url(#gold)" stroke="none"/>
+    <ellipse cx="110" cy="168" rx="58" ry="16" fill="url(#gold)"/>
+    <rect x="52" y="136" width="116" height="32" fill="url(#gold)" stroke="none"/>
+    <ellipse cx="110" cy="136" rx="58" ry="16" fill="url(#gold)"/>
+    <rect x="52" y="104" width="116" height="32" fill="url(#gold)" stroke="none"/>
+    <ellipse cx="110" cy="104" rx="58" ry="16" fill="#f6d27a"/>
+    <path d="M52 104 L52 200 M168 104 L168 200" fill="none"/>
+  </g>
+  <g filter="url(#shadow)">
+    <path d="M196 40 l10 24 l26 2 l-20 17 l6 25 l-22 -14 l-22 14 l6 -25 l-20 -17 l26 -2 Z" fill="#ff9e1a"
+          stroke="#1a1410" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+"""
+
+# A trophy cup with a check: achievements that count again.
+CUP = f"""
+  <circle cx="128" cy="130" r="88" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <path d="M70 52 L186 52 L180 110 Q172 156 128 162 Q84 156 76 110 Z" fill="url(#gold)" stroke="#5a3a10"
+          stroke-width="4" stroke-linejoin="round"/>
+    <path d="M74 66 Q36 66 42 98 Q48 124 82 128" fill="none" stroke="url(#gold)" stroke-width="10"/>
+    <path d="M182 66 Q220 66 214 98 Q208 124 174 128" fill="none" stroke="url(#gold)" stroke-width="10"/>
+    <rect x="116" y="160" width="24" height="30" fill="url(#gold)" stroke="#5a3a10" stroke-width="3"/>
+    <rect x="84" y="188" width="88" height="22" rx="4" fill="url(#wood)" stroke="#2a1a0c" stroke-width="3"/>
+    <path d="M100 100 L120 122 L158 80" fill="none" stroke="#1a1410" stroke-width="12" stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+"""
+
+ICONS = {"BestiaryTracker": BEAST, "ComfortHelper": COMFORT, "ExploreHelper": COMPASS, "FishTracker": FISH, "FoodTracker": FOOD, "MerchantTracker": COINS, "ModdedAchievements": CUP, "WorldSeed": SEED, "AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():
