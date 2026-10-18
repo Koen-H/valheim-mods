@@ -8,6 +8,7 @@ need them, except EssenceForAll, which works best when the whole group has it.
 
 | | Mod | What it does | |
 | --- | --- | --- | --- |
+| <img src="AchievementPeek/icon.png" width="64" alt=""> | **AchievementPeek** | Going for every achievement? See the foods, creatures, fish and deaths you're still missing instead of ???, and reveal secret achievements one boss at a time. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/AchievementPeek/) · [Details](AchievementPeek/README.md) |
 | <img src="BossReset/icon.png" width="64" alt=""> | **BossReset** | A boss fight gone wrong? `/bossreset` removes the boss and its minions and gives back your summoning items, so you can start over. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BossReset/) · [Details](BossReset/README.md) |
 | <img src="BuildTracker/icon.png" width="64" alt=""> | **BuildTracker** | Adds a **Not built** tab to the build menu with every piece you have never placed, and shows how many pieces you haven't discovered yet. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/BuildTracker/) · [Details](BuildTracker/README.md) |
 | <img src="CraftTracker/icon.png" width="64" alt=""> | **CraftTracker** | Adds a **Not crafted** tab to crafting stations with every item you have never made. You can craft straight from it. | [Download](https://thunderstore.io/c/valheim/p/koendertjh/CraftTracker/) · [Details](CraftTracker/README.md) |

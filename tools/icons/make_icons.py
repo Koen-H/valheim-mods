@@ -173,7 +173,26 @@ BOSS = f"""
   </g>
 """
 
-ICONS = {"BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
+# A medal with a half-revealed "?": achievements that no longer hide what they need.
+PEEK = f"""
+  <g filter="url(#shadow)">
+    <path d="M96 30 L128 96 L104 108 L70 40 Z" fill="#7a2a22" stroke="#2a1410" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M160 30 L128 96 L152 108 L186 40 Z" fill="#9a3a2c" stroke="#2a1410" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+  <circle cx="128" cy="156" r="86" fill="url(#glow)"/>
+  <g filter="url(#shadow)">
+    <circle cx="128" cy="156" r="64" fill="url(#gold)" stroke="#5a3a10" stroke-width="5"/>
+    <circle cx="128" cy="156" r="50" fill="none" stroke="#fff1c4" stroke-width="3" opacity="0.6"/>
+  </g>
+  <text x="128" y="186" text-anchor="middle" font-family="Georgia, serif" font-weight="bold" font-size="84"
+        fill="#2a1a0c">?</text>
+  <g fill="#ffd27a">
+    <path d="M52 96 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 Z"/>
+    <path d="M206 110 l3 7 l7 3 l-7 3 l-3 7 l-3 -7 l-7 -3 l7 -3 Z"/>
+  </g>
+"""
+
+ICONS = {"AchievementPeek": PEEK, "BossReset": BOSS, "BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():
