@@ -1,0 +1,9 @@
+{
+  "name": "BestiaryTracker",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Marks creatures you have never slain above their health bar and cheers each new kind you slay, for The Hunter and The Master Hunter achievements.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
