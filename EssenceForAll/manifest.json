@@ -1,6 +1,6 @@
 {
   "name": "EssenceForAll",
-  "version_number": "1.0.0",
+  "version_number": "1.0.1",
   "website_url": "https://github.com/Koen-H/valheim-mods",
   "description": "Essences (Thunderblood, Frostfire) always drop, and creatures drop one batch per player that was nearby when they spawned, so everyone in the group gets their share.",
   "dependencies": [
