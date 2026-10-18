@@ -111,53 +111,56 @@ namespace MaterialTracker
             Rewire(button2.onClick, "OnOpenTrophies");
             button2.onClick.AddListener(() => Open(gui));
 
-            // Right after the Trophies button: a layout group places it; otherwise move it one button further.
+            // The row (Texts, Skills, Trophies, Achievements, PvP) is placed by hand, 100 apart. Put Materials
+            // right after Trophies and spread the row evenly over the panel.
             copy.transform.SetSiblingIndex(trophies.transform.GetSiblingIndex() + 1);
             if (copy.transform.parent.GetComponent<LayoutGroup>() == null)
-            {
-                var rt = (RectTransform)copy.transform;
-                rt.anchoredPosition += NextButtonOffset(trophies);
-            }
+                SpreadRow((RectTransform)trophies.transform, (RectTransform)copy.transform);
 
             UITooltip tooltip = copy.GetComponent<UITooltip>();
             if (tooltip != null)
                 tooltip.Set(Title, "Every crafting material, and where to find it");
 
-            // Swap the trophy picture for a bronze bar.
-            Sprite icon = ObjectDB.instance?.GetItemPrefab("Bronze")?.GetComponent<ItemDrop>()?.m_itemData.GetIcon();
-            Image picture = null;
-            foreach (Image image in copy.GetComponentsInChildren<Image>(true))
+            // The row's icons are light shapes tinted gold by their Image colour; a white bar shape gets the same look.
+            Image picture = copy.transform.Find("Image")?.GetComponent<Image>();
+            if (picture != null)
             {
-                if (image.gameObject == copy || image.sprite == null)
-                    continue;
-                if (picture == null || image.name.ToLowerInvariant().Contains("icon"))
-                    picture = image;
-            }
-            if (icon != null && picture != null)
-            {
-                picture.sprite = icon;
+                picture.sprite = BarIcon.Get();
                 picture.preserveAspect = true;
             }
         }
 
-        // The step from the Trophies button to its nearest neighbour button, or one button width to the left.
-        private static Vector2 NextButtonOffset(Button trophies)
+        // Every button of the row: same height and size as the Trophies button.
+        private static void SpreadRow(RectTransform trophies, RectTransform materials)
         {
-            var rt = (RectTransform)trophies.transform;
-            Vector2 best = new Vector2(-(rt.rect.width + 6f), 0f);
-            float bestDistance = float.MaxValue;
-            foreach (Transform sibling in rt.parent)
+            var row = new List<RectTransform>();
+            foreach (Transform child in trophies.parent)
             {
-                if (sibling == rt || sibling.GetComponent<Button>() == null || !(sibling is RectTransform other))
-                    continue;
-                Vector2 step = other.anchoredPosition - rt.anchoredPosition;
-                if (step.magnitude > 1f && step.magnitude < bestDistance)
-                {
-                    bestDistance = step.magnitude;
-                    best = -step;
-                }
+                if (child is RectTransform rt && child != materials &&
+                    Mathf.Abs(rt.anchoredPosition.y - trophies.anchoredPosition.y) < 1f &&
+                    (rt.sizeDelta - trophies.sizeDelta).sqrMagnitude < 1f)
+                    row.Add(rt);
             }
-            return best;
+            row.Sort((a, b) => a.anchoredPosition.x.CompareTo(b.anchoredPosition.x));
+            row.Insert(row.IndexOf(trophies) + 1, materials);
+            if (row.Count < 2)
+                return;
+
+            float first = row[0].anchoredPosition.x;
+            float last = row[row.Count - 1].anchoredPosition.x;
+            float spacing = Mathf.Max(last - first, 0f) / (row.Count - 2);
+            float width = ((RectTransform)trophies.parent).rect.width;
+            // Keep the old spacing if it fits, otherwise squeeze the row into the panel.
+            if (width > 0f)
+                spacing = Mathf.Min(spacing, (width - trophies.sizeDelta.x - 8f) / (row.Count - 1));
+
+            float center = (first + last) / 2f;
+            float x = center - spacing * (row.Count - 1) / 2f;
+            foreach (RectTransform button in row)
+            {
+                button.anchoredPosition = new Vector2(x, trophies.anchoredPosition.y);
+                x += spacing;
+            }
         }
 
         private static string PathFrom(Transform root, Transform target)
