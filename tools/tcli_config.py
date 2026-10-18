@@ -12,6 +12,7 @@ import zipfile
 
 NAMESPACE = "koendertjh"
 CATEGORIES = {
+    "BossReset": ["mods", "client-side", "tweaks", "utility", "ai-generated"],
     "BuildTracker": ["mods", "client-side", "building", "utility", "ai-generated"],
     "CraftTracker": ["mods", "client-side", "crafting", "utility", "ai-generated"],
     "EssenceForAll": ["mods", "client-side", "tweaks", "ai-generated"],

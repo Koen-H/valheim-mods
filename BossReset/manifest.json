@@ -1,0 +1,9 @@
+{
+  "name": "BossReset",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Boss fight gone wrong? /bossreset removes the boss and its minions and gives back the summoning items.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
