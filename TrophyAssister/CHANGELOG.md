@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+- Multiplayer: the pity roll now goes to the player who got the kill, also when the creature is owned by
+  another player's game (before, only the owner's game rolled pity, so kills often didn't count). The
+  owner needs the mod too; it sends the kill to the killer, whose game rolls the pity and drops the trophy.
+- `OnlyCountMyKills = false` no longer counts other players' kills for you; they count for them.
+
 ## 1.0.2
 
 - Added screenshots to the README.
