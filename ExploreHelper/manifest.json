@@ -1,0 +1,9 @@
+{
+  "name": "ExploreHelper",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Pins the four far edges of the world on your map and tells you when you reach one, for The Explorer and The Pathfinder achievements.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
