@@ -129,12 +129,17 @@ namespace TrophyAssister
             Patcher.SafePatch(_harmony, typeof(GenerateDropListPatch));
             Patcher.SafePatch(_harmony, typeof(TrophyListPatch));
             Patcher.SafePatch(_harmony, typeof(TrophyNet));
+            Patcher.SafePatch(_harmony, typeof(SaveOnLogout));
             Commands.Register();
 
             Logger.LogInfo($"{ModName} {ModVersion} loaded (client-side).");
         }
 
-        private void Update() => PityLabel.Tick();
+        private void Update()
+        {
+            PityLabel.Tick();
+            PityStore.SaveIfDue();
+        }
 
         private void OnDestroy()
         {
@@ -590,10 +595,34 @@ namespace TrophyAssister
 
     // Saves pity counters to BepInEx/config/TrophyAssister_pity.txt
     // Format per line: CharacterID|CreaturePrefab=DryKills
+    // Kills only mark the counters as changed; they are written SaveDelay seconds later (so a fight is one write),
+    // on logout and when the game closes.
     internal static class PityStore
     {
+        private const float SaveDelay = 30f;
+
         private static readonly Dictionary<string, int> Counts = new Dictionary<string, int>();
         private static string FilePath => Path.Combine(Paths.ConfigPath, "TrophyAssister_pity.txt");
+        private static bool _dirty;
+        private static float _saveAt;
+
+        private static void MarkDirty()
+        {
+            if (_dirty) return;
+            _dirty = true;
+            _saveAt = Time.realtimeSinceStartup + SaveDelay;
+        }
+
+        // Called every frame from the plugin.
+        public static void SaveIfDue()
+        {
+            if (_dirty && Time.realtimeSinceStartup >= _saveAt) Save();
+        }
+
+        public static void SaveIfDirty()
+        {
+            if (_dirty) Save();
+        }
 
         private static string Key(string ch, string creature) => $"{ch}|{creature}";
 
@@ -604,13 +633,13 @@ namespace TrophyAssister
         {
             int v = Get(ch, creature) + Math.Max(1, amount);
             Counts[Key(ch, creature)] = v;
-            Save();
+            MarkDirty();
             return v;
         }
 
         public static void Reset(string ch, string creature)
         {
-            if (Counts.Remove(Key(ch, creature))) Save();
+            if (Counts.Remove(Key(ch, creature))) MarkDirty();
         }
 
         // creature prefab -> dry kills, for one character
@@ -666,12 +695,20 @@ namespace TrophyAssister
 
         public static void Save()
         {
+            _dirty = false;
             try
             {
                 File.WriteAllLines(FilePath, Counts.OrderBy(k => k.Key).Select(k => $"{k.Key}={k.Value}"));
             }
             catch (Exception e) { TrophyAssisterPlugin.Log?.LogWarning($"Couldn't save pity file: {e.Message}"); }
         }
+    }
+
+    // Writes changed pity counters before the game leaves the world.
+    [HarmonyPatch(typeof(Game), nameof(Game.Logout))]
+    internal static class SaveOnLogout
+    {
+        private static void Prefix() => PityStore.SaveIfDirty();
     }
 
     internal static class Patcher
