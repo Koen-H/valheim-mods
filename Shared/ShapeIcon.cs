@@ -99,25 +99,24 @@ namespace Koendertjh.Shared
             return false;
         }
 
-        // Distance to the nearest mostly-outside pixel, up to a limit.
+        // Distance to the nearest mostly-outside pixel, up to a limit. Compares squared distances; one root at the end.
         private static float DistanceToEdge(float[] coverage, int x, int y)
         {
-            float best = MaxDistance;
+            int best = MaxDistance * MaxDistance;
             for (int dy = -MaxDistance; dy <= MaxDistance; dy++)
             {
+                int py = y + dy;
                 for (int dx = -MaxDistance; dx <= MaxDistance; dx++)
                 {
-                    float d = Mathf.Sqrt(dx * dx + dy * dy);
-                    if (d >= best)
+                    int d2 = dx * dx + dy * dy;
+                    if (d2 >= best)
                         continue;
                     int px = x + dx;
-                    int py = y + dy;
-                    bool outside = px < 0 || py < 0 || px >= Size || py >= Size || coverage[py * Size + px] < 0.5f;
-                    if (outside)
-                        best = d;
+                    if (px < 0 || py < 0 || px >= Size || py >= Size || coverage[py * Size + px] < 0.5f)
+                        best = d2;
                 }
             }
-            return best;
+            return Mathf.Sqrt(best);
         }
 
         internal static bool Trapezoid(float x, float y, float bottom, float top, float bottomLeft, float bottomRight,

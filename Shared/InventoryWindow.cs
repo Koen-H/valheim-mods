@@ -51,6 +51,22 @@ namespace Koendertjh.Shared
         private Scrollbar _scrollbar;
         private TMP_Text _titleText;
         private float _baseHeight;
+        // Entries are made once and reused by every later open; only their picture, texts and colours change.
+        private readonly List<Slot> _slots = new List<Slot>();
+
+        private sealed class Slot
+        {
+            public GameObject Root;
+            public Image Icon;
+            public TMP_Text Name;
+            public TMP_Text Description;
+            public Color NameColor;
+            public Color DescriptionColor;
+            public GameObject QuestionMark;
+        }
+
+        private static int s_columns;
+        private static ObjectDB s_columnsDb;
 
         public InventoryWindow(string id, string title, string tooltip, Func<Sprite> buttonIcon,
             Func<List<WindowEntry>, string> fill)
@@ -91,6 +107,7 @@ namespace Koendertjh.Shared
             string rootPath = PathFrom(trophies.transform, gui.m_trophieListRoot);
             string scrollPath = PathFrom(trophies.transform, gui.m_trophyListScroll.transform);
 
+            _slots.Clear();
             _panel = UnityEngine.Object.Instantiate(trophies, trophies.transform.parent);
             _panel.name = _id + PanelSuffix;
             _panel.SetActive(false);
@@ -278,42 +295,45 @@ namespace Koendertjh.Shared
             if (Player.m_localPlayer == null || _listRoot == null)
                 return;
 
-            for (int i = _listRoot.childCount - 1; i >= 0; i--)
-                UnityEngine.Object.Destroy(_listRoot.GetChild(i).gameObject);
-
             var entries = new List<WindowEntry>();
             string title = _fill(entries);
 
             float space = gui.m_trophieListSpace;
             int columns = Columns();
-            for (int index = 0; index < entries.Count; index++)
-            {
-                WindowEntry entry = entries[index];
-                GameObject element = UnityEngine.Object.Instantiate(gui.m_trophieElementPrefab, _listRoot);
-                element.SetActive(true);
-                var rt = (RectTransform)element.transform;
-                rt.anchoredPosition = new Vector2(index % columns * space, index / columns * -space);
+            while (_slots.Count < entries.Count)
+                _slots.Add(NewSlot(gui));
 
-                Image icon = rt.Find("icon_bkg/icon")?.GetComponent<Image>();
-                TMP_Text name = rt.Find("name")?.GetComponent<TMP_Text>();
-                TMP_Text description = rt.Find("description")?.GetComponent<TMP_Text>();
+            for (int index = 0; index < _slots.Count; index++)
+            {
+                Slot slot = _slots[index];
+                if (index >= entries.Count)
+                {
+                    if (slot.Root.activeSelf)
+                        slot.Root.SetActive(false);
+                    continue;
+                }
+
+                WindowEntry entry = entries[index];
+                slot.Root.SetActive(true);
+                ((RectTransform)slot.Root.transform).anchoredPosition =
+                    new Vector2(index % columns * space, index / columns * -space);
 
                 switch (entry.State)
                 {
                     case EntryState.Done:
-                        SetIcon(icon, name, entry.Icon, Color.white);
-                        if (name != null) name.text = entry.Name;
-                        if (description != null) description.text = entry.Description;
+                        SetIcon(slot, entry.Icon, Color.white);
+                        SetText(slot.Name, entry.Name, slot.NameColor);
+                        SetText(slot.Description, entry.Description, slot.DescriptionColor);
                         break;
                     case EntryState.Missing:
-                        SetIcon(icon, name, entry.Icon, GreyIcon);
-                        SetGrey(name, entry.Name);
-                        SetGrey(description, entry.Description);
+                        SetIcon(slot, entry.Icon, GreyIcon);
+                        SetText(slot.Name, entry.Name, GreyText);
+                        SetText(slot.Description, entry.Description, GreyText);
                         break;
                     default:
-                        SetIcon(icon, name, null, GreyIcon);
-                        SetGrey(name, "??????");
-                        SetGrey(description, HiddenText);
+                        SetIcon(slot, null, GreyIcon);
+                        SetText(slot.Name, "??????", GreyText);
+                        SetText(slot.Description, HiddenText, GreyText);
                         break;
                 }
             }
@@ -327,50 +347,78 @@ namespace Koendertjh.Shared
                 _scrollbar.value = 1f;
         }
 
-        private static void SetGrey(TMP_Text text, string value)
+        private Slot NewSlot(InventoryGui gui)
+        {
+            GameObject element = UnityEngine.Object.Instantiate(gui.m_trophieElementPrefab, _listRoot);
+            Transform rt = element.transform;
+            var slot = new Slot
+            {
+                Root = element,
+                Icon = rt.Find("icon_bkg/icon")?.GetComponent<Image>(),
+                Name = rt.Find("name")?.GetComponent<TMP_Text>(),
+                Description = rt.Find("description")?.GetComponent<TMP_Text>()
+            };
+            slot.NameColor = slot.Name != null ? slot.Name.color : Color.white;
+            slot.DescriptionColor = slot.Description != null ? slot.Description.color : Color.white;
+            return slot;
+        }
+
+        private static void SetText(TMP_Text text, string value, Color color)
         {
             if (text == null)
                 return;
             text.text = value;
-            text.color = GreyText;
+            text.color = color;
         }
 
-        // No sprite: a "?" in the font of the name instead.
-        private static void SetIcon(Image icon, TMP_Text styleSource, Sprite sprite, Color color)
+        // No sprite: a "?" in the font of the name instead, made once per entry.
+        private static void SetIcon(Slot slot, Sprite sprite, Color color)
         {
+            Image icon = slot.Icon;
             if (icon == null)
                 return;
             if (sprite != null)
             {
+                icon.enabled = true;
                 icon.sprite = sprite;
                 icon.color = color;
+                if (slot.QuestionMark != null)
+                    slot.QuestionMark.SetActive(false);
                 return;
             }
-            if (styleSource == null)
-                return;
+
             icon.enabled = false;
+            if (slot.QuestionMark == null && slot.Name != null)
+            {
+                // A child of the icon: switching the icon's image off doesn't hide its children.
+                GameObject mark = UnityEngine.Object.Instantiate(slot.Name.gameObject, icon.transform);
+                var rt = (RectTransform)mark.transform;
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+                rt.localScale = Vector3.one;
 
-            GameObject mark = UnityEngine.Object.Instantiate(styleSource.gameObject, icon.transform);
-            var rt = (RectTransform)mark.transform;
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-            rt.localScale = Vector3.one;
-
-            TMP_Text text = mark.GetComponent<TMP_Text>();
-            float height = ((RectTransform)icon.transform).rect.height;
-            text.enableAutoSizing = false;
-            text.fontSize = height > 0f ? height * 0.8f : 48f;
-            text.alignment = TextAlignmentOptions.Center;
-            text.color = GreyText;
-            text.text = "?";
+                TMP_Text text = mark.GetComponent<TMP_Text>();
+                float height = ((RectTransform)icon.transform).rect.height;
+                text.enableAutoSizing = false;
+                text.fontSize = height > 0f ? height * 0.8f : 48f;
+                text.alignment = TextAlignmentOptions.Center;
+                text.color = GreyText;
+                text.text = "?";
+                slot.QuestionMark = mark;
+            }
+            if (slot.QuestionMark != null)
+                slot.QuestionMark.SetActive(true);
         }
 
-        // Same number of columns as the trophy grid.
+        // Same number of columns as the trophy grid, worked out once per ObjectDB.
         private static int Columns()
         {
+            if (s_columnsDb == ObjectDB.instance && s_columns > 0)
+                return s_columns;
+
             int columns = 1;
             foreach (GameObject prefab in ObjectDB.instance.m_items)
             {
@@ -378,6 +426,8 @@ namespace Koendertjh.Shared
                 if (item != null && item.m_itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Trophy)
                     columns = Mathf.Max(columns, item.m_itemData.m_shared.m_trophyPos.x + 1);
             }
+            s_columnsDb = ObjectDB.instance;
+            s_columns = columns;
             return columns;
         }
     }

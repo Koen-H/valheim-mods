@@ -166,9 +166,15 @@ namespace MaterialTracker
                     }
                 }
 
-                AddConversions(prefab.GetComponent<Smelter>()?.m_conversion?.Select(c => (c.m_from, c.m_to)), prefab.GetComponent<Smelter>()?.m_name);
-                AddConversions(prefab.GetComponent<Fermenter>()?.m_conversion?.Select(c => (c.m_from, c.m_to)), prefab.GetComponent<Fermenter>()?.m_name);
-                AddConversions(prefab.GetComponent<CookingStation>()?.m_conversion?.Select(c => (c.m_from, c.m_to)), prefab.GetComponent<CookingStation>()?.m_name);
+                Smelter smelter = prefab.GetComponent<Smelter>();
+                if (smelter != null)
+                    AddConversions(smelter.m_conversion?.Select(c => (c.m_from, c.m_to)), smelter.m_name);
+                Fermenter fermenter = prefab.GetComponent<Fermenter>();
+                if (fermenter != null)
+                    AddConversions(fermenter.m_conversion?.Select(c => (c.m_from, c.m_to)), fermenter.m_name);
+                CookingStation cooking = prefab.GetComponent<CookingStation>();
+                if (cooking != null)
+                    AddConversions(cooking.m_conversion?.Select(c => (c.m_from, c.m_to)), cooking.m_name);
 
                 FoundAll(prefab.GetComponent<MineRock>()?.m_dropItems, "Mined from rocks and deposits");
                 FoundAll(prefab.GetComponent<MineRock5>()?.m_dropItems, "Mined from rocks and deposits");
