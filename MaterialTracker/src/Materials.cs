@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Koendertjh.Shared;
 using UnityEngine;
 
 namespace MaterialTracker
@@ -135,7 +136,7 @@ namespace MaterialTracker
                 {
                     if (spawn?.m_prefab == null || !spawn.m_enabled)
                         continue;
-                    Stage stage = EarliestStage(spawn.m_biome);
+                    Stage stage = Stages.Earliest(spawn.m_biome);
                     if (!spawnStage.TryGetValue(spawn.m_prefab.name, out Stage known) || stage < known)
                         spawnStage[spawn.m_prefab.name] = stage;
                 }
@@ -184,21 +185,6 @@ namespace MaterialTracker
                         Found(ware.m_prefab != null ? ware.m_prefab.gameObject : null, "Sold by " + Localization.instance.Localize(trader.m_name));
                 }
             }
-        }
-
-        private static Stage EarliestStage(Heightmap.Biome biomes)
-        {
-            Stage best = Stage.DeepNorth;
-            foreach (Heightmap.Biome biome in System.Enum.GetValues(typeof(Heightmap.Biome)))
-            {
-                if (biome != Heightmap.Biome.None && (biomes & biome) == biome && (int)biome != (int)Heightmap.Biome.All)
-                {
-                    Stage stage = StageTable.FromBiome(biome);
-                    if (stage < best)
-                        best = stage;
-                }
-            }
-            return best;
         }
 
         private static void AddConversions(IEnumerable<(ItemDrop from, ItemDrop to)> conversions, string station)

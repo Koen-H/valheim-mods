@@ -1,5 +1,5 @@
 // The biome stage of raw materials, by item name. A material is revealed once the boss before its biome is
-// defeated (see Stage). Materials not listed here get their stage from the creatures that drop them (the biome
+// defeated (see Shared/Stages.cs). Materials not listed here get their stage from the creatures that drop them (the biome
 // they spawn in) or from what they are made of (the latest stage of the ingredients).
 
 using System.Collections.Generic;
@@ -7,40 +7,8 @@ using Koendertjh.Shared;
 
 namespace MaterialTracker
 {
-    internal enum Stage
-    {
-        Meadows,
-        BlackForest,
-        Swamp,
-        Mountain,
-        Plains,
-        Mistlands,
-        Ashlands,
-        DeepNorth
-    }
-
     internal static class StageTable
     {
-        /// <summary>The boss whose defeat reveals the materials of a stage.</summary>
-        internal static Boss RevealedBy(Stage stage) => (Boss)(int)stage;
-
-        internal static Stage FromBiome(Heightmap.Biome biome)
-        {
-            switch (biome)
-            {
-                case Heightmap.Biome.Meadows: return Stage.Meadows;
-                case Heightmap.Biome.BlackForest: return Stage.BlackForest;
-                case Heightmap.Biome.Swamp:
-                case Heightmap.Biome.Ocean: return Stage.Swamp;
-                case Heightmap.Biome.Mountain: return Stage.Mountain;
-                case Heightmap.Biome.Plains: return Stage.Plains;
-                case Heightmap.Biome.Mistlands: return Stage.Mistlands;
-                case Heightmap.Biome.AshLands: return Stage.Ashlands;
-                case Heightmap.Biome.DeepNorth: return Stage.DeepNorth;
-                default: return Stage.DeepNorth;
-            }
-        }
-
         internal static readonly Dictionary<string, Stage> Raw = new Dictionary<string, Stage>
         {
             // Meadows

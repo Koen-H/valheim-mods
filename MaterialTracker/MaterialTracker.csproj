@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\BossProgress.cs" Link="Shared\BossProgress.cs" />
+    <Compile Include="..\Shared\Stages.cs" Link="Shared\Stages.cs" />
+    <Compile Include="..\Shared\InventoryWindow.cs" Link="Shared\InventoryWindow.cs" />
+    <Compile Include="..\Shared\ShapeIcon.cs" Link="Shared\ShapeIcon.cs" />
   </ItemGroup>
 
   <ItemGroup>

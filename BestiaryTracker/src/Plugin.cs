@@ -4,6 +4,7 @@
 // harder). The lists come from those achievements, so they match what the game counts.
 // 1. Creatures you haven't slain yet get a marker after their name, above their health bar.
 // 2. Slaying a new kind shows a message with your progress.
+// 3. A Bestiary button next to Trophies opens a window with every creature, slain or not, and where they live.
 // On hard difficulty or harder the Master Hunter list is used, until that achievement is done.
 // Client-side only; works on vanilla servers.
 
@@ -26,6 +27,8 @@ namespace BestiaryTracker
         internal static ConfigEntry<bool> NameMarker;
         internal static ConfigEntry<string> MarkerText;
         internal static ConfigEntry<bool> KillMessage;
+        internal static ConfigEntry<bool> ShowAll;
+        internal static ConfigEntry<bool> ShowSlain;
 
         private Harmony _harmony;
 
@@ -39,6 +42,12 @@ namespace BestiaryTracker
                 "The marker. Rich text is allowed.");
             KillMessage = Config.Bind("1 - General", "KillMessage", true,
                 "Slaying a new kind of creature shows a message with your progress.");
+
+            ShowAll = Config.Bind("2 - Bestiary", "ShowAll", false,
+                "Show every creature in the Bestiary right away. Off = creatures of a biome show once you defeated " +
+                "the boss before it; later ones show as '?'.");
+            ShowSlain = Config.Bind("2 - Bestiary", "ShowSlain", true,
+                "Also list the creatures you have already slain. Off = only the missing ones.");
 
             _harmony = new Harmony(ModGuid);
             _harmony.PatchAll(typeof(BestiaryTrackerPlugin).Assembly);
