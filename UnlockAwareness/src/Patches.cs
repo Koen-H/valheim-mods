@@ -67,7 +67,14 @@ namespace UnlockAwareness
         private static readonly System.Action<Player> UpdateKnownRecipesList =
             AccessTools.MethodDelegate<System.Action<Player>>(AccessTools.Method(typeof(Player), "UpdateKnownRecipesList"));
 
-        // Runs every frame while the inventory is open, so it only builds keys when something is unseen.
+        // Badges per slot, remembered after they are first made: the grids update every frame while the
+        // inventory is open. Slots are destroyed when a grid changes size; their entries are then dropped.
+        private static readonly Dictionary<InventoryElement, UnseenBadge> s_badges = new Dictionary<InventoryElement, UnseenBadge>();
+        private static readonly Dictionary<InventoryElement, GameObject> s_unknownBadges = new Dictionary<InventoryElement, GameObject>();
+        private static ItemDrop.ItemData[] s_slots = new ItemDrop.ItemData[0];
+        private static int s_width;
+
+        // Runs every frame while the inventory is open, for the player grid and an open chest's grid.
         [HarmonyPatch(typeof(InventoryGrid), "UpdateGui")]
         [HarmonyPostfix]
         private static void UpdateGui_Postfix(InventoryGrid __instance)
@@ -78,8 +85,36 @@ namespace UnlockAwareness
             if (!container && __instance != gui.m_playerGrid) return;
 
             if (container && UnlockAwarenessPlugin.LearnFromContainers.Value) LearnItems(__instance.GetInventory());
+            FillSlots(__instance.GetInventory());
             UpdateNewBadges(__instance);
             if (container) UpdateUnknownBadges(__instance);
+        }
+
+        // Grid position -> item, once per call instead of a search through the inventory for every slot.
+        private static void FillSlots(Inventory inventory)
+        {
+            if (inventory == null)
+            {
+                s_width = 0;
+                System.Array.Clear(s_slots, 0, s_slots.Length);
+                return;
+            }
+            s_width = inventory.GetWidth();
+            int size = s_width * inventory.GetHeight();
+            if (s_slots.Length < size) s_slots = new ItemDrop.ItemData[size];
+            System.Array.Clear(s_slots, 0, s_slots.Length);
+            foreach (ItemDrop.ItemData item in inventory.GetAllItems())
+            {
+                int index = item.m_gridPos.y * s_width + item.m_gridPos.x;
+                if (index >= 0 && index < size) s_slots[index] = item;
+            }
+        }
+
+        private static ItemDrop.ItemData ItemIn(InventoryElement element)
+        {
+            if (!element.m_used || s_width == 0) return null;
+            int index = element.Position.y * s_width + element.Position.x;
+            return index >= 0 && index < s_slots.Length ? s_slots[index] : null;
         }
 
         // Opening a chest counts as having its items: the game learns them exactly like a pickup, so the
@@ -101,18 +136,26 @@ namespace UnlockAwareness
 
         private static void UpdateNewBadges(InventoryGrid grid)
         {
-            Inventory inventory = grid.GetInventory();
-            bool show = UnlockAwarenessPlugin.InventoryBadges.Value && UnseenStore.HasAnyUnseen && inventory != null;
+            bool show = UnlockAwarenessPlugin.InventoryBadges.Value && UnseenStore.HasAnyUnseen;
 
             foreach (InventoryElement element in ElementsRef(grid))
             {
-                // Top center: the corners hold the hotbar number, quality and other game markers.
-                UnseenBadge badge = UiFactory.GetOrCreateBadge(element.transform, 18f, new Vector2(0.5f, 1f), new Vector2(0f, -10f));
-                ItemDrop.ItemData item = show && element.m_used ? inventory.GetItemAt(element.Position.x, element.Position.y) : null;
-                if (item != null && UnseenStore.IsUnseen(UnlockKind.Item, item.m_shared.m_name))
+                ItemDrop.ItemData item = show ? ItemIn(element) : null;
+                bool unseen = item != null && UnseenStore.IsUnseenItem(item.m_shared.m_name);
+
+                if (!s_badges.TryGetValue(element, out UnseenBadge badge) || badge == null)
                 {
-                    string key = UnseenStore.MakeKey(UnlockKind.Item, item.m_shared.m_name);
-                    if (badge.Key != key) badge.Show(key);
+                    if (!unseen) continue;
+                    // Top center: the corners hold the hotbar number, quality and other game markers.
+                    badge = UiFactory.GetOrCreateBadge(element.transform, 18f, new Vector2(0.5f, 1f), new Vector2(0f, -10f));
+                    Remember(s_badges, element, badge);
+                }
+
+                if (unseen)
+                {
+                    // The key is only built when the badge starts showing this item.
+                    if (!ShowsItem(badge, item.m_shared.m_name))
+                        badge.Show(UnseenStore.MakeKey(UnlockKind.Item, item.m_shared.m_name));
                 }
                 else if (badge.gameObject.activeSelf)
                 {
@@ -121,21 +164,43 @@ namespace UnlockAwareness
             }
         }
 
+        private static bool ShowsItem(UnseenBadge badge, string name) =>
+            badge.gameObject.activeSelf && badge.Key != null && badge.Key.Length == name.Length + 2 &&
+            badge.Key.StartsWith("i:", System.StringComparison.Ordinal) &&
+            badge.Key.EndsWith(name, System.StringComparison.Ordinal);
+
         // A "?" on chest items this character has never had. Taking one makes the game learn it
         // (AddKnownItem), which swaps the "?" for the "!" in the player's inventory.
         private static void UpdateUnknownBadges(InventoryGrid grid)
         {
             Player player = Player.m_localPlayer;
-            Inventory inventory = grid.GetInventory();
-            bool show = UnlockAwarenessPlugin.ContainerBadges.Value && player != null && inventory != null;
+            bool show = UnlockAwarenessPlugin.ContainerBadges.Value && player != null;
 
             foreach (InventoryElement element in ElementsRef(grid))
             {
-                GameObject badge = UiFactory.GetOrCreateUnknownBadge(element.transform, element.m_amount, 22f, new Vector2(0.5f, 1f), new Vector2(0f, -11f));
-                ItemDrop.ItemData item = show && element.m_used ? inventory.GetItemAt(element.Position.x, element.Position.y) : null;
+                ItemDrop.ItemData item = show ? ItemIn(element) : null;
                 bool unknown = item != null && !player.IsKnownMaterial(item.m_shared.m_name);
+
+                if (!s_unknownBadges.TryGetValue(element, out GameObject badge) || badge == null)
+                {
+                    if (!unknown) continue;
+                    badge = UiFactory.GetOrCreateUnknownBadge(element.transform, element.m_amount, 22f, new Vector2(0.5f, 1f), new Vector2(0f, -11f));
+                    Remember(s_unknownBadges, element, badge);
+                }
                 if (badge.activeSelf != unknown) badge.SetActive(unknown);
             }
+        }
+
+        private static void Remember<T>(Dictionary<InventoryElement, T> badges, InventoryElement element, T badge) where T : Object
+        {
+            badges[element] = badge;
+            if (badges.Count <= 256) return;
+            var gone = new List<InventoryElement>();
+            foreach (KeyValuePair<InventoryElement, T> pair in badges)
+            {
+                if (pair.Key == null || pair.Value == null) gone.Add(pair.Key);
+            }
+            foreach (InventoryElement key in gone) badges.Remove(key);
         }
 
         // Left click (or gamepad select) and right click (use/equip) both count as looking at the item.
