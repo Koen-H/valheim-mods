@@ -15,6 +15,7 @@ CATEGORIES = {
     "BuildTracker": ["mods", "client-side", "building", "utility", "ai-generated"],
     "CraftTracker": ["mods", "client-side", "crafting", "utility", "ai-generated"],
     "EssenceForAll": ["mods", "client-side", "tweaks", "ai-generated"],
+    "SummonTweaks": ["mods", "client-side", "tweaks", "ai-generated"],
     "TrophyAssister": ["mods", "client-side", "tweaks", "utility", "ai-generated"],
     "UnlockAwareness": ["mods", "client-side", "crafting", "building", "utility", "ai-generated"],
 }

@@ -125,7 +125,34 @@ ESSENCE = f"""
   </g>
 """
 
-ICONS = {"BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "TrophyAssister": TROPHY,
+# A see-through spirit with an arrow passing straight through it: players walk through summons.
+SUMMON = f"""
+  <defs>
+    <linearGradient id="spirit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8fbff" stop-opacity="0.85"/>
+      <stop offset="0.55" stop-color="#5fd0e0" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#1f6f8a" stop-opacity="0.25"/>
+    </linearGradient>
+    <radialGradient id="spiritglow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7fe6f2" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7fe6f2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="134" r="96" fill="url(#spiritglow)"/>
+  <g filter="url(#shadow)" fill="none" stroke="{PARCHMENT}" stroke-width="9" stroke-linecap="round"
+     stroke-linejoin="round">
+    <path d="M30 152 L206 152"/>
+    <path d="M188 130 L216 152 L188 174"/>
+  </g>
+  <path d="M74 214 L74 118 Q74 54 128 54 Q182 54 182 118 L182 214 L164 196 L146 214 L128 196 L110 214 L92 196 Z"
+        fill="url(#spirit)" stroke="#d8fbff" stroke-opacity="0.8" stroke-width="3.5" stroke-linejoin="round"/>
+  <ellipse cx="108" cy="114" rx="10" ry="14" fill="#0e2a33"/>
+  <ellipse cx="148" cy="114" rx="10" ry="14" fill="#0e2a33"/>
+  <ellipse cx="111" cy="108" rx="3.5" ry="4.5" fill="#d8fbff"/>
+  <ellipse cx="151" cy="108" rx="3.5" ry="4.5" fill="#d8fbff"/>
+"""
+
+ICONS = {"BuildTracker": BUILD, "CraftTracker": CRAFT, "EssenceForAll": ESSENCE, "SummonTweaks": SUMMON, "TrophyAssister": TROPHY,
          "UnlockAwareness": UNLOCK}
 
 for mod, art in ICONS.items():

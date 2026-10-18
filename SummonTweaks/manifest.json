@@ -1,0 +1,9 @@
+{
+  "name": "SummonTweaks",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Walk straight through your summoned skeletons and spirits, and the Spirit Caller always summons a spirit you don't have yet.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
