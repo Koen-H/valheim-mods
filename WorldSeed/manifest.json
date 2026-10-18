@@ -1,0 +1,9 @@
+{
+  "name": "WorldSeed",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/Koen-H/valheim-mods",
+  "description": "Shows the world seed on the big map and with /seed, also on servers. Optionally kept secret until you defeat a boss.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351"
+  ]
+}
