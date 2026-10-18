@@ -32,8 +32,35 @@ namespace ComfortHelper
         private static List<Piece> s_comfortPrefabs;
         private static ZNetScene s_scene;
 
-        private static string GroupOf(Piece piece) =>
+        /// <summary>Pieces of one group don't stack; pieces without a group count once per kind.</summary>
+        internal static string GroupOf(Piece piece) =>
             piece.m_comfortGroup != Piece.ComfortGroup.None ? piece.m_comfortGroup.ToString() : piece.m_name;
+
+        /// <summary>The piece that counts for each group within 10 m, as the game counts it.</summary>
+        internal static Dictionary<string, Piece> BestNearby(Vector3 position)
+        {
+            var best = new Dictionary<string, Piece>();
+            s_nearby.Clear();
+            Piece.GetAllComfortPiecesInRadius(position, Radius, s_nearby);
+            foreach (Piece piece in s_nearby)
+            {
+                string group = GroupOf(piece);
+                if (!best.TryGetValue(group, out Piece current) || piece.GetComfort() > current.GetComfort())
+                    best[group] = piece;
+            }
+            return best;
+        }
+
+        /// <summary>Names of the comfort pieces within 10 m, counting or not.</summary>
+        internal static HashSet<string> NamesNearby(Vector3 position)
+        {
+            var names = new HashSet<string>();
+            s_nearby.Clear();
+            Piece.GetAllComfortPiecesInRadius(position, Radius, s_nearby);
+            foreach (Piece piece in s_nearby)
+                names.Add(piece.m_name);
+            return names;
+        }
 
         internal static ComfortReport Build(Player player)
         {
@@ -44,16 +71,7 @@ namespace ComfortHelper
                 MaxReached = MaxComfort()
             };
 
-            // Best piece of each group nearby, as the game counts it.
-            var best = new Dictionary<string, Piece>();
-            s_nearby.Clear();
-            Piece.GetAllComfortPiecesInRadius(player.transform.position, Radius, s_nearby);
-            foreach (Piece piece in s_nearby)
-            {
-                string group = GroupOf(piece);
-                if (!best.TryGetValue(group, out Piece current) || piece.GetComfort() > current.GetComfort())
-                    best[group] = piece;
-            }
+            Dictionary<string, Piece> best = BestNearby(player.transform.position);
 
             // Best known and best overall piece of each group.
             var bestKnown = new Dictionary<string, Piece>();
