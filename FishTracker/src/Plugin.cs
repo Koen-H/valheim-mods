@@ -6,7 +6,7 @@
 //    few fish of that bait show up, picked from the fish that live in the biome you are in. Fish you haven't
 //    caught yet are more likely, and some come with stars (up to the 3 stars that A Catch Worthy of Njord needs).
 // 3. A fishing indicator under the crosshair says when to pull: to hook a fish that bites, and to reel in a
-//    hooked fish that isn't fighting.
+//    hooked fish that isn't fighting. Optionally, picking up a fish by hand counts as catching it.
 // Chum is a new item: it disappears from inventories and chests if the mod is removed.
 
 using BepInEx;
@@ -35,6 +35,7 @@ namespace FishTracker
         internal static ConfigEntry<int> MaxLevel;
         internal static ConfigEntry<bool> TetraInDeepNorth;
         internal static ConfigEntry<bool> FishingIndicator;
+        internal static ConfigEntry<bool> HandCatchCounts;
 
         private Harmony _harmony;
 
@@ -70,6 +71,9 @@ namespace FishTracker
             FishingIndicator = Config.Bind("3 - Fishing", "Indicator", true,
                 "Show under the crosshair when to reel in (block) while fishing: when a fish bites, and while a " +
                 "hooked fish is calm. Says to wait while a hooked fish fights, when reeling costs double stamina.");
+            HandCatchCounts = Config.Bind("3 - Fishing", "HandCatchCounts", false,
+                "Picking up a fish by hand counts as catching it, like a catch with the rod: for The Fisherman, " +
+                "A Catch Worthy of Njord and the fish caught stats.");
 
             _harmony = new Harmony(ModGuid);
             _harmony.PatchAll(typeof(FishTrackerPlugin).Assembly);

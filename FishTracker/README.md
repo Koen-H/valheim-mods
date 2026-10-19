@@ -25,9 +25,12 @@ are missing and gives you a way to bring the fish to you.
     half the line, and running out of stamina loses the fish. Fights last a few seconds (longer for fish
     with stars), then the fish rests and you can reel again.
 
-Fish only count for the achievements when you catch them with a rod while achievements can be earned. Valheim
-turns achievements off in a game marked as modded (Jotunn and several other mods do this); install
-[ModdedAchievements](https://thunderstore.io/c/valheim/p/koendertjh/ModdedAchievements/) to turn them back on.
+- **Hand catches** (`HandCatchCounts`, off by default): picking up a fish by hand, for example one that
+  flopped onto the shore, counts as catching it, just like a catch with the rod.
+
+Fish only count for the achievements when you catch them with a rod (or by hand, with `HandCatchCounts`)
+while achievements can be earned. Valheim turns achievements off in a game marked as modded (Jotunn and
+several other mods do this); install [ModdedAchievements](https://thunderstore.io/c/valheim/p/koendertjh/ModdedAchievements/) to turn them back on.
 
 ## Multiplayer
 
@@ -49,3 +52,4 @@ and chests.
 | Chum | `MaxLevel` | `4` | Highest level of chum fish (4 = 3 stars). |
 | Chum | `TetraInDeepNorth` | `false` | Chum can also bring Tetra in the Deep North. |
 | Fishing | `Indicator` | `true` | Show under the crosshair when to reel in and when to wait while fishing. |
+| Fishing | `HandCatchCounts` | `false` | Picking up a fish by hand counts as catching it. |
