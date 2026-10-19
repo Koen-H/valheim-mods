@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+
+- Seasonal pieces and recipes all year (off by default): `SeasonalPieces` lets you build the Yule, Midsummer and
+  Halloween decorations outside their event, `SeasonalRecipes` does the same for seasonal recipes.
+
 ## 1.0.1
 
 - Added screenshots to the README.
