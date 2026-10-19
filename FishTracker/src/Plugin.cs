@@ -64,8 +64,8 @@ namespace FishTracker
                     new AcceptableValueRange<int>(1, 5)));
 
             FishingIndicator = Config.Bind("3 - Fishing", "Indicator", true,
-                "Show under the crosshair when to pull (block) while fishing: when a fish bites, and while a hooked " +
-                "fish is calm. Says 'Hold' while a hooked fish fights, when pulling costs double stamina.");
+                "Show under the crosshair when to reel in (block) while fishing: when a fish bites, and while a " +
+                "hooked fish is calm. Says to wait while a hooked fish fights, when reeling costs double stamina.");
 
             _harmony = new Harmony(ModGuid);
             _harmony.PatchAll(typeof(FishTrackerPlugin).Assembly);

@@ -1,9 +1,10 @@
-// Fishing indicator: a word under the crosshair that says when to pull (block) and when to wait.
+// Fishing indicator: a line under the crosshair that says when to reel in (block) and when to wait.
 //
-// - Bait in the water, nothing biting: "Wait for a bite". Pulling only reels the line in.
-// - A fish bites on the right bait: "Pull!" for the half second in which pulling hooks it.
-// - Fish on the hook: "Pull" while it is calm, "Hold" while it fights. Pulling a fighting fish costs
-//   twice the stamina for half the line, and running out of stamina loses the fish.
+// - Bait in the water, nothing biting: "Wait for a bite". Reeling now only pulls the bait closer.
+// - A fish bites on the right bait: "Bite! Reel in to hook it" for the half second in which that works.
+// - Fish on the hook: "Reel in" while it is calm, "Fish is fighting, wait" while it thrashes. Reeling a
+//   fighting fish costs twice the stamina for half the line, and running out of stamina loses the fish.
+//   A hooked fish fights for 0.5-3 s (longer with stars), then rests for 0.75-4 s.
 
 using HarmonyLib;
 using TMPro;
@@ -71,13 +72,14 @@ namespace FishTracker
             Fish fish = fishingFloat.GetCatch();
             if (fish != null)
             {
-                if (IsFighting(fish))
-                    Show("Hold", HoldColor);
+                // The player who hooks a fish takes ownership of it, so its fight timer runs here.
+                if (fish.IsEscaping())
+                    Show("Fish is fighting, wait", HoldColor);
                 else
-                    Show("Pull", PullColor);
+                    Show("Reel in", PullColor);
             }
             else if (s_nibbler(fishingFloat) != null && Time.time - s_nibbleTime(fishingFloat) < HookWindow)
-                Show("Pull!", PullColor);
+                Show("Bite! Reel in to hook it", PullColor);
             else
                 Show("Wait for a bite", WaitColor);
         }
@@ -103,16 +105,6 @@ namespace FishTracker
                     return fishingFloat;
             }
             return null;
-        }
-
-        // Read from the fish's ZDO, the same values the game uses to splash a fighting fish on every client.
-        private static bool IsFighting(Fish fish)
-        {
-            ZNetView view = fish.GetComponent<ZNetView>();
-            if (view == null || !view.IsValid())
-                return fish.IsEscaping();
-            ZDO zdo = view.GetZDO();
-            return zdo.GetInt(ZDOVars.s_hooked) == 1 && zdo.GetFloat(ZDOVars.s_escape) > 0f;
         }
     }
 }
