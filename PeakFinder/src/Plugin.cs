@@ -4,6 +4,7 @@
 // foundation; Mighty Halls a piece 49 m above the ground below it (Player.PlacePiece).
 // 1. The big map gets a "Show high points" toggle: pins on the highest peaks of the world, with how much you
 //    still need to build on top. Peaks are found from the world generator, so they are right for every seed.
+//    A "Show whole map" toggle lifts the fog from the big map while it is on, to look for mountains.
 // 2. A new highest or tallest build shows a message with how far you are from both achievements.
 // Client-side only; the pins are only on your own map and are not saved.
 
@@ -31,6 +32,7 @@ namespace PeakFinder
         internal static ConfigEntry<int> PeakCount;
         internal static ConfigEntry<float> MinDistance;
         internal static ConfigEntry<bool> OnlyExplored;
+        internal static ConfigEntry<bool> ShowWholeMap;
         internal static ConfigEntry<bool> HeightMessages;
 
         private Harmony _harmony;
@@ -48,7 +50,11 @@ namespace PeakFinder
                 new ConfigDescription("Peaks are at least this many metres apart, so one mountain doesn't fill the list.",
                     new AcceptableValueRange<float>(100f, 3000f)));
             OnlyExplored = Config.Bind("1 - Map", "OnlyExplored", true,
-                "Only show peaks in parts of the map you (or players you shared the map with) have explored.");
+                "Only show peaks in parts of the map you (or players you shared the map with) have explored. " +
+                "Ignored while ShowWholeMap is on.");
+            ShowWholeMap = Config.Bind("1 - Map", "ShowWholeMap", false,
+                "Lift the fog from the whole big map while this is on; what you explored doesn't change. " +
+                "Also switched with the toggle on the big map.");
             HeightMessages = Config.Bind("2 - Messages", "HeightMessages", true,
                 "A message when you place your highest or tallest piece so far, with how far you are from " +
                 "Top of the World (432 m) and Mighty Halls (49 m).");
