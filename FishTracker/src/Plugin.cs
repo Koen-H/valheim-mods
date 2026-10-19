@@ -33,6 +33,7 @@ namespace FishTracker
         internal static ConfigEntry<float> UncaughtWeight;
         internal static ConfigEntry<float> LevelUpChance;
         internal static ConfigEntry<int> MaxLevel;
+        internal static ConfigEntry<bool> TetraInDeepNorth;
         internal static ConfigEntry<bool> FishingIndicator;
 
         private Harmony _harmony;
@@ -62,6 +63,9 @@ namespace FishTracker
             MaxLevel = Config.Bind("2 - Chum", "MaxLevel", 4,
                 new ConfigDescription("Highest fish level from chum. Level 4 (3 stars) is what A Catch Worthy of Njord needs.",
                     new AcceptableValueRange<int>(1, 5)));
+            TetraInDeepNorth = Config.Bind("2 - Chum", "TetraInDeepNorth", false,
+                "Chum can also bring Tetra (a Mountain fish) in the Deep North, where the snowy peaks count as Deep " +
+                "North instead of Mountain.");
 
             FishingIndicator = Config.Bind("3 - Fishing", "Indicator", true,
                 "Show under the crosshair when to reel in (block) while fishing: when a fish bites, and while a " +

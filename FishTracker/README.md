@@ -13,6 +13,8 @@ are missing and gives you a way to bring the fish to you.
   - Fish you haven't caught yet are more likely to show up.
   - Some come with stars. A *Catch Worthy of Njord* needs a fish of exactly level 4 (3 stars); a 4-star
     fish (level 5) does not count. Chum fish go up to level 4.
+  - `TetraInDeepNorth` (off by default) lets chum bring Tetra in the Deep North too: the game counts its
+    snowy peaks as Deep North, not Mountain, so without it Tetra only comes in the Mountains.
   - Wrong biome or not deep enough? You get a message and keep your chum.
 - **Fishing indicator.** While your bait is in the water, a line under the crosshair tells you what to do.
   Reeling in is holding block (right mouse button by default).
@@ -45,4 +47,5 @@ and chests.
 | Chum | `UncaughtWeight` | `3` | Fish you haven't caught yet are this many times more likely. |
 | Chum | `LevelUpChance` | `0.25` | Chance for a chum fish to gain a star, rolled again for each star. |
 | Chum | `MaxLevel` | `4` | Highest level of chum fish (4 = 3 stars). |
+| Chum | `TetraInDeepNorth` | `false` | Chum can also bring Tetra in the Deep North. |
 | Fishing | `Indicator` | `true` | Show under the crosshair when to reel in and when to wait while fishing. |
