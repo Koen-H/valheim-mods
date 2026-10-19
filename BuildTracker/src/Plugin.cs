@@ -3,6 +3,7 @@
 // The tab lists every piece of the tool in hand that this character has never placed.
 // The data comes from the character's own save: the per-piece "placed" stats that the
 // game keeps for the building achievements. Client-side only, nothing is written.
+// Optionally, seasonal build pieces and recipes (Yule, Midsummer, Halloween ...) are available all year.
 
 using BepInEx;
 using BepInEx.Configuration;
@@ -26,6 +27,8 @@ namespace BuildTracker
         internal static ConfigEntry<string> UndiscoveredText;
         internal static ConfigEntry<string> CongratsText;
         internal static ConfigEntry<string> CongratsSoFarText;
+        internal static ConfigEntry<bool> SeasonalPieces;
+        internal static ConfigEntry<bool> SeasonalRecipes;
 
         private Harmony _harmony;
 
@@ -48,10 +51,22 @@ namespace BuildTracker
                 "Congrats! You have built every piece you have discovered so far. There are still more pieces to build that you have not discovered yet!",
                 "Shown in the tab when every discovered piece has been built, but some are still undiscovered.");
 
+            SeasonalPieces = Config.Bind("Seasonal", "SeasonalPieces", false,
+                "Seasonal build pieces (Yule, Midsummer, Halloween ...) can be built all year, not only during " +
+                "their event. They then also count in the Not built tab.");
+            SeasonalRecipes = Config.Bind("Seasonal", "SeasonalRecipes", false,
+                "Seasonal recipes (like the Yule hat and the Midsummer crown) can be crafted all year.");
+            SeasonalPieces.SettingChanged += (_, __) => Seasons.Apply();
+            SeasonalRecipes.SettingChanged += (_, __) => Seasons.Apply();
+
             _harmony = new Harmony(ModGuid);
             _harmony.PatchAll(typeof(BuildTrackerPlugin).Assembly);
         }
 
-        private void OnDestroy() => _harmony?.UnpatchSelf();
+        private void OnDestroy()
+        {
+            _harmony?.UnpatchSelf();
+            Seasons.Restore();
+        }
     }
 }

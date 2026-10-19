@@ -15,6 +15,11 @@ Adds a **Not built** tab to the build menu (after Favorites) that lists every pi
 
 - Built everything? The tab says **"Congrats! You have built every piece of it!"** (or, while some pieces are still undiscovered, that everything discovered so far is built and there
   are more pieces left to discover).
+- **Seasonal pieces all year** (off by default). Missed Yule, Midsummer or Halloween? Turn on `SeasonalPieces`
+  and the seasonal decorations (like the Yule tree and the Jack-o-turnip) can be built all year; they then count
+  in the Not built tab too. `SeasonalRecipes` does the same for seasonal recipes (like the Yule hat and the
+  Midsummer crown). You still unlock them the normal way, with the materials; only the date check is gone.
+  Turning a setting off puts the dates back, no restart needed.
 - Client-side only; works on vanilla servers.
 
 ## Limitations
@@ -25,11 +30,13 @@ Adds a **Not built** tab to the build menu (after Favorites) that lists every pi
 
 ## Config (`com.koendertjh.buildtracker.cfg`)
 
-| Setting | Default | Description |
-| --- | --- | --- |
-| `TabName` | `Not built` | Label of the tab (restart the game to apply). |
-| `ShowCategories` | `true` | Show the category list on the left of the tab. |
-| `ShowUndiscovered` | `true` | Show the "not discovered yet" bar. |
-| `UndiscoveredText` | `{0} not discovered yet` | Text of that bar; `{0}` is the number. |
-| `CongratsText` | `Congrats! You have built every piece of it!` | Shown when every piece of the tool is built. |
-| `CongratsSoFarText` | `Congrats! You have built every piece you have discovered so far. There are still more pieces to build that you have not discovered yet!` | Shown when everything discovered is built. |
+| Section | Setting | Default | Description |
+| --- | --- | --- | --- |
+| General | `TabName` | `Not built` | Label of the tab (restart the game to apply). |
+| General | `ShowCategories` | `true` | Show the category list on the left of the tab. |
+| General | `ShowUndiscovered` | `true` | Show the "not discovered yet" bar. |
+| General | `UndiscoveredText` | `{0} not discovered yet` | Text of that bar; `{0}` is the number. |
+| General | `CongratsText` | `Congrats! You have built every piece of it!` | Shown when every piece of the tool is built. |
+| General | `CongratsSoFarText` | `Congrats! You have built every piece you have discovered so far. There are still more pieces to build that you have not discovered yet!` | Shown when everything discovered is built. |
+| Seasonal | `SeasonalPieces` | `false` | Seasonal build pieces can be built all year. |
+| Seasonal | `SeasonalRecipes` | `false` | Seasonal recipes can be crafted all year. |
