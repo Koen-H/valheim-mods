@@ -1,5 +1,6 @@
-// Hand catches: picking up a fish by hand (one that flopped onto land) counts as catching it, the same way a
-// catch with the rod does: The Fisherman, A Catch Worthy of Njord and the "fish caught" stats.
+// Hand catches: picking up a fish by hand while it hangs on a fishing line (hooked, and pulled onto land)
+// counts as catching it, the same way reeling it all the way in does: The Fisherman, A Catch Worthy of Njord
+// and the "fish caught" stats. Fish that aren't hooked still don't count.
 //
 // FishingFloat.Catch also ends in Humanoid.Pickup, sometimes a few frames later when the fish belongs to
 // another player, so fish caught with the rod are remembered and skipped here.
@@ -33,7 +34,9 @@ namespace FishTracker
             if (!FishTrackerPlugin.HandCatchCounts.Value || go == null || __instance != Player.m_localPlayer ||
                 s_rodCatches.Remove(go))
                 return;
-            __state = go.GetComponent<Fish>();
+            Fish fish = go.GetComponent<Fish>();
+            if (fish != null && FishingFloat.FindFloat(fish) != null)
+                __state = fish;
         }
 
         [HarmonyPostfix]
