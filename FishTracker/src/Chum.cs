@@ -15,6 +15,7 @@ namespace FishTracker
     internal static class Chum
     {
         private const string PrefabPrefix = "Chum_";
+        private const string TetraPrefab = "Fish4_cave";
 
         private static GameObject s_holder;
         // Chum prefab -> its bait prefab.
@@ -177,7 +178,7 @@ namespace FishTracker
             var candidates = new List<FishInfo>();
             foreach (FishInfo fish in FishData.All)
             {
-                if (fish.Baits.ContainsKey(bait) && (fish.Biomes & biome) != 0)
+                if (fish.Baits.ContainsKey(bait) && LivesIn(fish, biome))
                     candidates.Add(fish);
             }
             if (candidates.Count == 0)
@@ -199,6 +200,10 @@ namespace FishTracker
             player.Message(MessageHud.MessageType.Center, "The water stirs...");
             return true;
         }
+
+        private static bool LivesIn(FishInfo fish, Heightmap.Biome biome) =>
+            (fish.Biomes & biome) != 0 ||
+            (biome == Heightmap.Biome.DeepNorth && FishTrackerPlugin.TetraInDeepNorth.Value && fish.Prefab.name == TetraPrefab);
 
         // A point in front of the player with at least 2 m of water.
         private static bool FindWater(Player player, out Vector3 point, out float waterLevel)
