@@ -4,8 +4,11 @@
 mountain is that high, so you build on top of one, and the higher the mountain, the less you have to build.
 PeakFinder shows you the highest peaks.
 
-- **"Show high points" on the big map.** A toggle below the "public position" one puts pins on the highest
-  peaks of your world: *Peak 401 m (+31 m)*, where the extra is what you still have to build on top.
+- **"Show high points" on the big map.** A toggle in the bottom right, styled like the Cartography Table one,
+  puts pins on the highest peaks of your world: *Peak 401 m (+31 m)*, where the extra is what you still have
+  to build on top.
+- **"Show whole map"** (off by default). A second toggle lifts the fog from the big map while it is on, so you
+  can look for mountains and see all peaks. What you explored doesn't change: turn it off and the fog is back.
 - **Right for every world.** The peaks come from the world generator, the same heights the terrain is made of.
   They are worked out once when you load the world, which takes a few seconds the first time you turn it on.
 - **No spoilers.** By default only peaks in parts of the map you have explored show up. Turn off `OnlyExplored`
@@ -26,5 +29,6 @@ to turn them back on.
 | Map | `ShowPeaks` | `false` | Show the peaks. Also switched with the toggle on the big map. |
 | Map | `PeakCount` | `10` | Number of peaks to show. |
 | Map | `MinDistance` | `500` | Peaks are at least this many metres apart. |
-| Map | `OnlyExplored` | `true` | Only show peaks in explored parts of the map. |
+| Map | `OnlyExplored` | `true` | Only show peaks in explored parts of the map (ignored while `ShowWholeMap` is on). |
+| Map | `ShowWholeMap` | `false` | Lift the fog from the big map. Also switched with the toggle on the big map. |
 | Messages | `HeightMessages` | `true` | A message for your highest and tallest piece so far. |
