@@ -1,6 +1,6 @@
 {
   "name": "FishTracker",
-  "version_number": "1.0.0",
+  "version_number": "1.1.0",
   "website_url": "https://github.com/Koen-H/valheim-mods",
   "description": "Shows which fish you haven't caught and which bait they take, and adds chum: bait mashed up to lure the fish of your biome right to you.",
   "dependencies": [

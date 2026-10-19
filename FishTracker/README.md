@@ -14,6 +14,12 @@ are missing and gives you a way to bring the fish to you.
   - Some come with stars. A *Catch Worthy of Njord* needs a fish of exactly level 4 (3 stars); a 4-star
     fish (level 5) does not count. Chum fish go up to level 4.
   - Wrong biome or not deep enough? You get a message and keep your chum.
+- **Fishing indicator.** While your bait is in the water, a word under the crosshair tells you what to do:
+  - *Wait for a bite*: nothing is biting yet; pulling only reels in your line.
+  - **Pull!** (green): a fish bites. Pull (block) now to hook it, you only have half a second.
+  - **Pull** (green): the hooked fish is calm, reel it in.
+  - **Hold** (red): the hooked fish is fighting. Pulling now costs twice the stamina for half the line, and
+    running out of stamina loses the fish.
 
 Fish only count for the achievements when you catch them with a rod while achievements can be earned. Valheim
 turns achievements off in a game marked as modded (Jotunn and several other mods do this); install
@@ -37,3 +43,4 @@ and chests.
 | Chum | `UncaughtWeight` | `3` | Fish you haven't caught yet are this many times more likely. |
 | Chum | `LevelUpChance` | `0.25` | Chance for a chum fish to gain a star, rolled again for each star. |
 | Chum | `MaxLevel` | `4` | Highest level of chum fish (4 = 3 stars). |
+| Fishing | `Indicator` | `true` | Show under the crosshair when to pull and when to hold while fishing. |

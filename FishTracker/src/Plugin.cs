@@ -5,6 +5,8 @@
 // 2. Chum: every fishing bait can be mashed into chum by hand. Use it (right click) while facing water and a
 //    few fish of that bait show up, picked from the fish that live in the biome you are in. Fish you haven't
 //    caught yet are more likely, and some come with stars (up to the 3 stars that A Catch Worthy of Njord needs).
+// 3. A fishing indicator under the crosshair says when to pull: to hook a fish that bites, and to reel in a
+//    hooked fish that isn't fighting.
 // Chum is a new item: it disappears from inventories and chests if the mod is removed.
 
 using BepInEx;
@@ -31,6 +33,7 @@ namespace FishTracker
         internal static ConfigEntry<float> UncaughtWeight;
         internal static ConfigEntry<float> LevelUpChance;
         internal static ConfigEntry<int> MaxLevel;
+        internal static ConfigEntry<bool> FishingIndicator;
 
         private Harmony _harmony;
 
@@ -59,6 +62,10 @@ namespace FishTracker
             MaxLevel = Config.Bind("2 - Chum", "MaxLevel", 4,
                 new ConfigDescription("Highest fish level from chum. Level 4 (3 stars) is what A Catch Worthy of Njord needs.",
                     new AcceptableValueRange<int>(1, 5)));
+
+            FishingIndicator = Config.Bind("3 - Fishing", "Indicator", true,
+                "Show under the crosshair when to pull (block) while fishing: when a fish bites, and while a hooked " +
+                "fish is calm. Says 'Hold' while a hooked fish fights, when pulling costs double stamina.");
 
             _harmony = new Harmony(ModGuid);
             _harmony.PatchAll(typeof(FishTrackerPlugin).Assembly);
